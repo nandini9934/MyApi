@@ -1,109 +1,152 @@
-const express = require("express");
-const Meal = require("../models/trackmealmodels");
-const router = express.Router();
-const apiKeyMiddleware = require("./apikeymiddleware");
-const cors = require("./cors");
+// // this is the controller for the trackmeal route
+// // it handles the CRUD operations for the meals tracked by the user
+// // it uses the Meal model to interact with the database
+// const express = require("express");
+// const Meal = require("../models/trackmealmodels");
+// const router = express.Router();
+// const apiKeyMiddleware = require("./apikeymiddleware");
+// const cors = require("./cors");
 
-router.post("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
-  const userInfo = await Meal.find({ id: req.body.id }); //may be time consuming
-  // for user first time adding there meal
-  if (userInfo.length <= 0) {
-    const meal = new Meal(req.body);
-    try {
-      const newMeal = await meal.save();
-      res.status(201).json(newMeal);
-    } catch (err) {
-      res.status(400).json({ message: err.message });
-    }
-  } else {
-    //If date for the existing user is already there then append meal in that object only
-    //Or or create new array for that day's meal
-    const isDateAlreadyThere = userInfo[0].mealbydate.find(
-      (a) => a.date == req.body.mealbydate[0].date
-    ); //time consuming
+// router.use((req, res, next) => {
+//   console.log('Incoming request:', {
+//     method: req.method,
+//     path: req.path,
+//     body: req.body,
+//     query: req.query
+//   });
+//   next();
+// });
 
-    if (isDateAlreadyThere == undefined) {
-      const result = await Meal.findOneAndUpdate(
-        { id: req.body.id },
-        { $push: { mealbydate: { $each: req.body.mealbydate } } },
-        { new: true }
-      );
-      res.status(200).json({ result });
-    } else {
-      const result = await Meal.findOneAndUpdate(
-        {
-          id: req.body.id,
-          "mealbydate.date": req.body.mealbydate[0].date,
-        },
-        {
-          $push: { "mealbydate.$.meallist": req.body.mealbydate[0].meallist }, // Add the new meal to the meallist array
-        }
-      );
-      res.status(200).json({ result });
-    }
-  }
-});
+// router.use(express.json()); // Middleware to parse JSON bodies
 
-router.delete("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
-  //If date for the existing user is already there then append meal in that object only
-  //Or or create new array for that day's meal
-  const result = await Meal.findOneAndUpdate(
-    {
-      id: req.body.id,
-      "mealbydate.date": req.body.date,
-    },
-    {
-      $unset: { [`mealbydate.$.meallist.${req.body.indexToRemove}`]: "" }, //set required object null
-    }
-  );
+// router.post("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
+//   try {
+//     console.log("Request Body:", JSON.stringify(req.body, null, 2)); // Log full request
+    
+//     const { id, date, name, kcal, p, c, f, image, isVeg, mealType } = req.body;
 
-  const resu = await Meal.findOneAndUpdate(
-    {
-      id: req.body.id,
-      "mealbydate.date": req.body.date,
-    },
-    {
-      $pull: { "mealbydate.$.meallist": null }, // delete null meal object
-    }
-  );
+//     // Null-check with explicit logging
+//     if (!id || !date || !name || !kcal || !p || !c || !f || isVeg === undefined || !mealType) {
+//       console.error("Missing required fields:", { id, date, name, kcal, p, c, f, isVeg, mealType });
+//       return res.status(400).json({ 
+//         error: "Missing required fields",
+//         received: { id, date, name, kcal, p, c, f, isVeg, mealType }
+//       });
+//     }
 
-  res.status(200).json({ result });
-});
+//     // Replace undefined optional fields with null
+//     const sanitizedData = {
+//       id,
+//       date,
+//       name,
+//       kcal,
+//       p,
+//       c,
+//       f,
+//       image: image || null,
+//       isVeg,
+//       mealType
+//     };
 
-router.put("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
-  const result = await Meal.findOneAndUpdate(
-    {
-      id: req.body.id,
-      "mealbydate.date": req.body.date,
-    },
-    {
-      $set: {
-        [`mealbydate.$.meallist.${req.body.indexToUpdate}`]:
-          req.body.updatedMeal,
-      },
-    }
-  );
+//     // Proceed with creation
+//     const newMeal = await Meal.create(sanitizedData);
+//     return res.status(201).json(newMeal);
+    
+//   } catch (err) {
+//     console.error("Database Error:", {
+//       message: err.message,
+//       stack: err.stack,
+//       body: req.body
+//     });
+//     res.status(500).json({ 
+//       error: "Database operation failed",
+//       details: err.message 
+//     });
+//   }
+// });
 
-  res.status(200).json({ result });
-});
+// router.delete("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
+//   try {
+//     const { id, date, name } = req.body;
 
-router.get("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
-  try {
-    const { id, date } = req.query;
-    if (id != undefined) {
-      const meal = await Meal.find({ id: id });
-      const mealByDate = meal[0].mealbydate.find((a) => a.date == date);
-      if (date != undefined) {
-        res.json(mealByDate);
-      } else {
-        res.json(meal);
-      }
-    } else {
-      res.json({ message: "No user id found!!!" });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+//     // Delete a specific meal entry
+//     const result = await Meal.destroy({ where: { id, date, name } });
 
-module.exports = router;
+//     if (result === 0) {
+//       return res.status(404).json({ message: "Meal not found" });
+//     }
+
+//     res.status(200).json({ message: "Meal deleted successfully" });
+//   } catch (err) {
+//     res.status(500).json({ message: "An error occurred while deleting the meal", error: err.message });
+//   }
+// });
+
+// router.put("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
+//   try {
+//     const { id, date, name, updatedMeal } = req.body;
+
+//     if (!id || !date || !name || !updatedMeal) {
+//       return res.status(400).json({ 
+//         error: "Missing required fields",
+//         received: { id, date, name, updatedMeal }
+//       });
+//     }
+
+//     // Replace undefined optional fields in updatedMeal with null
+//     const sanitizedUpdatedMeal = {
+//       ...updatedMeal,
+//       image: updatedMeal.image || null
+//     };
+
+//     // Update a specific meal entry
+//     const result = await Meal.update(sanitizedUpdatedMeal, { where: { id, date, name } });
+
+//     if (result[0] === 0) {
+//       return res.status(404).json({ message: "Meal not found" });
+//     }
+
+//     res.status(200).json({ message: "Meal updated successfully" });
+//   } catch (err) {
+//     console.error("Error during update:", {
+//       message: err.message,
+//       stack: err.stack,
+//       body: req.body
+//     });
+//     res.status(500).json({ message: "An error occurred while updating the meal", error: err.message });
+//   }
+// });
+
+// router.get("/trackmeal", cors, apiKeyMiddleware, async (req, res) => {
+//   try {
+//     const { id, date } = req.query;
+
+//     // More explicit validation
+//     if (!id || !date) {
+//       console.error("Missing query parameters:", { id, date });
+//       return res.status(400).json({
+//         message: "Both id and date query parameters are required",
+//         received: {
+//           id: typeof id,
+//           date: typeof date
+//         }
+//       });
+//     }
+
+//     const meals = await Meal.findAll({ where: { id, date } });
+//     res.json(meals || []);
+//   } catch (err) {
+//     console.error("Error during fetch:", {
+//       message: err.message,
+//       stack: err.stack,
+//       query: req.query
+//     });
+//     res.status(500).json({ 
+//       message: "Error fetching meals",
+//       error: err.message,
+//       queryParams: req.query
+//     });
+//   }
+// });
+
+// module.exports = router;

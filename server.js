@@ -12,6 +12,10 @@ const dietSlots = require("./sqlroutes/dieticianSlots");
 const usercalls = require("./sqlroutes/userCalls");
 const product = require("./sqlroutes/products");
 const nutritionist = require("./sqlroutes/nutritionists");
+const foodItems = require("./sqlroutes/foodItems");
+const foodTemplates = require("./sqlroutes/foodTemplates");
+const dietPlans = require("./sqlroutes/dietPlans");
+const dietTemplates = require("./sqlroutes/dietTemplates");
 
 const app = express();
 const port = 3000;
@@ -44,8 +48,6 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-
-
 // Middleware
 app.use(bodyParser.json()); // Parse JSON bodies
 app.use("/api", userLoginApi); // Use the userLoginApi routes under "/api"
@@ -60,6 +62,10 @@ app.use("/api", dietSlots);
 app.use("/api", usercalls);
 app.use("/api", product);
 app.use("/api", nutritionist);
+app.use("/api", foodItems);
+app.use("/api", foodTemplates);
+app.use("/api", dietPlans);
+app.use("/api", dietTemplates);
 
 app.get("/test", (req, res) => {
   res.send("App restartedss");

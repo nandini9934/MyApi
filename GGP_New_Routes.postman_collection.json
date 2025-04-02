@@ -1,0 +1,1096 @@
+{
+	"info": {
+		"_postman_id": "new-routes-collection",
+		"name": "GGP New Routes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Existing Routes",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"gparmar1413@gmail.com\",\n  \"password\": \"pass\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/login",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "login"]
+						}
+					}
+				},
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" :\"something\",\n    \"email\": \"something@gmail.com\",\n    \"password\": \"something\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/signup",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "signup"]
+						}
+					}
+				},
+				{
+					"name": "Flyer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/flyer",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "flyer"]
+						}
+					}
+				},
+				{
+					"name": "FAQ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/faq",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "faq"]
+						}
+					}
+				},
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/products",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "products"]
+						}
+					}
+				},
+				{
+					"name": "Version",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/version",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "version"]
+						}
+					}
+				},
+				{
+					"name": "Track Meal",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/trackmeal?id=150",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "trackmeal"],
+							"query": [
+								{
+									"key": "id",
+									"value": "150"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Track Meal Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"115\",\n    \"indexToUpdate\":\"2\",\n    \"date\":\"2024-11-17\",\n    \"updatedMeal\" :{\n            \"name\": \"matar paneer\",\n            \"quantity\": \"1 pose\",\n            \"kcal\": \"65 Kcal\",\n            \"p\": \"P: 5g\",\n            \"c\": \"C: 5g\",\n            \"f\": \"F: 5g\",\n            \"image\": \"assets/images/flutter_logo.png\",\n            \"isVeg\": \"0\",\n            \"isSelected\": \"0\",\n            \"mealType\": \"Breakfast\"\n        }\n    \n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/trackmeal",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "trackmeal"]
+						}
+					}
+				},
+				{
+					"name": "Add Track Meal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"150\",\n    \"mealbydate\":[{\n    \"date\":\"2024-11-01\",\n    \"meallist\":[{\n            \"name\": \"Patar Chaneer\",\n            \"quantity\": \"1 pose\",\n            \"kcal\": \"65 Kcal\",\n            \"p\": \"P: 5g\",\n            \"c\": \"C: 5g\",\n            \"f\": \"F: 5g\",\n            \"image\": \"https://png.pngtree.com/png-vector/20231018/ourmid/pngtree-fast-foods-item-png-image_10303953.png\",\n            \"isVeg\": \"1\",\n            \"isSelected\": \"1\",\n            \"mealType\": \"Breakfast\"\n        }]}]\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/trackmeal",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "trackmeal"]
+						}
+					}
+				},
+				{
+					"name": "Delete Track Meal",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "ggp-pro-ject"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"150\",\n    \"indexToDelete\":\"0\",\n    \"date\":\"2024-11-12\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/trackmeal",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "trackmeal"]
+						}
+					}
+				},
+				{
+					"name": "User Meta Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/usermeta",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "usermeta"]
+						}
+					}
+				},
+				{
+					"name": "Update UserData",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"onboarded\": \"0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/userdata",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "userdata"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Food Items",
+			"item": [
+				{
+					"name": "Get All Food Items",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/fooditems",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "fooditems"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Items by Meal Type",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/fooditems/Dinner",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "fooditems", "Dinner"]
+						}
+					}
+				},
+				{
+					"name": "Add New Food Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Oatmeal with Fruits\",\n    \"kcal\": \"300\",\n    \"p\": \"10g\",\n    \"c\": \"50g\",\n    \"f\": \"5g\",\n    \"image\": \"https://example.com/oatmeal.jpg\",\n    \"isVeg\": 1,\n    \"mealType\": \"Breakfast\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/fooditems",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "fooditems"]
+						}
+					}
+				},
+				{
+					"name": "Update Food Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Oatmeal with Fruits\",\n    \"kcal\": \"350\",\n    \"p\": \"12g\",\n    \"c\": \"55g\",\n    \"f\": \"6g\",\n    \"image\": \"https://example.com/updated-oatmeal.jpg\",\n    \"isVeg\": 1,\n    \"mealType\": \"Breakfast\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/fooditems/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "fooditems", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Food Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/fooditems/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "fooditems", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Food Templates",
+			"item": [
+				{
+					"name": "Create Food Template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nutritionist_id\": 1,\n    \"name\": \"High Protein Breakfast Template\",\n    \"description\": \"A protein-rich breakfast template\",\n    \"food_items\": [\n        {\n            \"food_item_id\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"food_item_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/foodtemplates",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "foodtemplates"]
+						}
+					}
+				},
+				{
+					"name": "Get All Templates for Nutritionist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/foodtemplates/nutritionist/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "foodtemplates", "nutritionist", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Template",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/foodtemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "foodtemplates", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Food Template",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated High Protein Breakfast\",\n    \"description\": \"Updated description with more protein options\",\n    \"food_items\": [\n        {\n            \"food_item_id\": 1,\n            \"quantity\": 3\n        },\n        {\n            \"food_item_id\": 3,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/foodtemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "foodtemplates", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Food Template",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/foodtemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "foodtemplates", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Diet Templates",
+			"item": [
+				{
+					"name": "Create Diet Template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nutritionist_id\": 1,\n    \"name\": \"High Protein 7-Day Plan\",\n    \"description\": \"A balanced high-protein diet plan for the week\",\n    \"meals\": [\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Breakfast\",\n            \"food_item_id\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Lunch\",\n            \"template_id\": 1,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/diettemplates",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "diettemplates"]
+						}
+					}
+				},
+				{
+					"name": "Get All Templates for Nutritionist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/diettemplates/nutritionist/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "diettemplates", "nutritionist", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Template",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/diettemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "diettemplates", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Diet Template",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated High Protein 7-Day Plan\",\n    \"description\": \"Updated description with more protein options\",\n    \"meals\": [\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Breakfast\",\n            \"food_item_id\": 2,\n            \"quantity\": 3\n        },\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Lunch\",\n            \"template_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/diettemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "diettemplates", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Diet Template",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/diettemplates/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "diettemplates", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Diet Plans",
+			"item": [
+				{
+					"name": "Create Diet Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nutritionist_id\": 1,\n    \"client_id\": 2,\n    \"start_date\": \"2024-03-20\",\n    \"end_date\": \"2024-03-26\",\n    \"notes\": \"Customized high-protein diet plan\",\n    \"meals\": [\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Breakfast\",\n            \"food_item_id\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Lunch\",\n            \"template_id\": 1,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/dietplans",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "dietplans"]
+						}
+					}
+				},
+				{
+					"name": "Get All Plans for Nutritionist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/dietplans/nutritionist/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "dietplans", "nutritionist", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Diet Plan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/dietplans/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "dietplans", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Diet Plan",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_date\": \"2024-03-21\",\n    \"end_date\": \"2024-03-27\",\n    \"notes\": \"Updated diet plan with more variety\",\n    \"meals\": [\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Breakfast\",\n            \"food_item_id\": 2,\n            \"quantity\": 3\n        },\n        {\n            \"day_of_week\": 1,\n            \"meal_type\": \"Lunch\",\n            \"template_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/dietplans/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "dietplans", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Diet Plan",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/dietplans/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "dietplans", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Nutritionist Routes",
+			"item": [
+				{
+					"name": "Create Nutritionist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone_number\": \"+1234567890\",\n    \"specialty\": \"Weight Management\",\n    \"years_of_experience\": 5,\n    \"current_organisation\": \"Health Clinic\",\n    \"address\": \"123 Health Street\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists"]
+						}
+					}
+				},
+				{
+					"name": "Nutritionist Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Smith\",\n    \"email\": \"jane.smith@example.com\",\n    \"password\": \"securepassword123\",\n    \"phone_number\": \"+1987654321\",\n    \"specialty\": \"Sports Nutrition\",\n    \"years_of_experience\": 8,\n    \"current_organisation\": \"Sports Center\",\n    \"address\": \"456 Fitness Avenue\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/signup",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "signup"]
+						}
+					}
+				},
+				{
+					"name": "Nutritionist Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"jane.smith@example.com\",\n    \"password\": \"securepassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/login",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get All Nutritionists",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Nutritionist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Nutritionist",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"specialty\": \"Clinical Nutrition\",\n    \"years_of_experience\": 10,\n    \"current_organisation\": \"Medical Center\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Nutritionist",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get All Clients for Nutritionist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1/clients",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1", "clients"]
+						}
+					}
+				},
+				{
+					"name": "Add Client to Nutritionist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clientId\": 2,\n    \"notes\": \"Initial consultation completed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1/clients",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1", "clients"]
+						}
+					}
+				},
+				{
+					"name": "Update Client Status/Notes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"active\",\n    \"notes\": \"Client following diet plan well\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1/clients/2",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1", "clients", "2"]
+						}
+					}
+				},
+				{
+					"name": "Remove Client from Nutritionist",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionists/1/clients/2",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionists", "1", "clients", "2"]
+						}
+					}
+				},
+				{
+					"name": "Update Nutritionist Slots",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nutritionist_id\": 1,\n    \"date\": \"2024-03-20\",\n    \"SlotID\": [1, 2, 3]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionist/slots",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionist", "slots"]
+						}
+					}
+				},
+				{
+					"name": "Get Nutritionist Slots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{apiURL}}/api/nutritionist/slots/1/2024-03-20",
+							"host": ["{{apiURL}}"],
+							"path": ["api", "nutritionist", "slots", "1", "2024-03-20"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "apiURL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "your-jwt-token-here",
+			"type": "string"
+		}
+	]
+} 

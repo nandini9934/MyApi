@@ -97,35 +97,54 @@ router.post("/nutritionist/slots", (req, res) => {
 
 // GET: Fetch Nutritionist's Available Slots for a Specific Date
 router.get("/nutritionist/slots/:nutritionist_id/:date", (req, res) => {
-  const { nutritionist_id, date } = req.params;
+  try {
+    const { nutritionist_id, date } = req.params;
 
-  console.log("Received request to fetch slots for nutritionist:", nutritionist_id, "on date:", date);
-
-  // Step 1: Get all SlotIDs for the nutritionist on that day from NutritionistSlots table
-  const slotsQuery = `
-    SELECT ns.SlotID, s.SlotTime, ns.availability
-    FROM NutritionistSlots ns
-    JOIN Slots s ON ns.SlotID = s.SlotID
-    WHERE ns.nutritionist_id = ? AND DATE(ns.Date) = ?
-  `;
-
-  db.execute(slotsQuery, [nutritionist_id, date], (err, slotResults) => {
-    if (err) {
-      console.error("Error fetching SlotIDs:", err);
-      return res.status(500).json({ error: "Database error" });
+    // Validate the parameters
+    if (!nutritionist_id || !date) {
+      return res.status(400).json({ error: "Missing required parameters" });
     }
 
-    console.log("Fetched SlotIDs for nutritionist:", nutritionist_id, "on date:", date);
-
-    if (slotResults.length === 0) {
-      console.log("No slots found for this nutritionist on the given date");
-      return res.status(404).json({ message: "No slots found for this nutritionist on the given date" });
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
 
-    res.json({
-      slots: slotResults,
+    console.log("Received request to fetch slots for nutritionist:", nutritionist_id, "on date:", date);
+
+    // Step 1: Get all SlotIDs for the nutritionist on that day from NutritionistSlots table
+    const slotsQuery = `
+      SELECT ns.SlotID, s.SlotTime, ns.availability
+      FROM NutritionistSlots ns
+      JOIN Slots s ON ns.SlotID = s.SlotID
+      WHERE ns.nutritionist_id = ? AND DATE(ns.Date) = ?
+      ORDER BY s.SlotTime ASC
+    `;
+
+    db.execute(slotsQuery, [nutritionist_id, date], (err, slotResults) => {
+      if (err) {
+        console.error("Error fetching SlotIDs:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      console.log("Fetched SlotIDs for nutritionist:", nutritionist_id, "on date:", date);
+
+      if (slotResults.length === 0) {
+        console.log("No slots found for this nutritionist on the given date");
+        return res.status(404).json({ message: "No slots found for this nutritionist on the given date" });
+      }
+
+      res.json({
+        nutritionist_id,
+        date,
+        slots: slotResults,
+      });
     });
-  });
+  } catch (err) {
+    console.error("Server error:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 module.exports = router;

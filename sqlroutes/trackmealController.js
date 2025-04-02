@@ -12,20 +12,28 @@ router.post("/addmeal", cors, auth, async (req, res) => {
   const userID = req?.userInfo?.user?.id;
   const {
     mealDate,
-    mealName,
+    name,
     quantity,
     kcal,
     p,
     c,
     f,
     image,
-    foodType,
+    isVeg,
     mealType,
   } = req.body;
 
+  // Validate required fields
+  if (!userID || !mealDate || !quantity || !kcal || !p || !c || !f || !mealType) {
+    return res.status(400).json({
+      message: "Missing required fields. Please provide all necessary data.",
+      received: { userID, mealDate, name, quantity, kcal, p, c, f, mealType },
+    });
+  }
+
   const query = `
         INSERT INTO MealByDate (
-          userId, mealDate, mealName, quantity, kcal, p, c, f, image, foodType, mealType , isSelected
+          userId, mealDate, name, quantity, kcal, p, c, f, image, isVeg, mealType, isSelected
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
       `;
 
@@ -34,19 +42,19 @@ router.post("/addmeal", cors, auth, async (req, res) => {
     [
       userID,
       mealDate,
-      mealName,
+      name || "Unnamed Meal", // Provide a default value if name is missing
       quantity,
       kcal,
       p,
       c,
       f,
-      image,
-      isVeg,
+      image || null, // Use null if image is not provided
+      isVeg !== undefined ? isVeg : null, // Use null if isVeg is not provided
       mealType,
     ],
     (error, result) => {
       if (error) {
-        console.error("Error adding meal:", err);
+        console.error("Error adding meal:", error);
         res
           .status(500)
           .json({ message: "An error occurred while adding the meal." });
@@ -60,14 +68,21 @@ router.post("/addmeal", cors, auth, async (req, res) => {
 });
 
 router.get("/trackmeal", cors, auth, (req, res) => {
-  const { date } = req.body;
+  const { date } = req.query; // Read from query params, not body
   const userID = req?.userInfo?.user?.id;
 
-  const query = "Select * from MealByDate Where userId = ? AND mealDate = ?";
+  if (!date || !userID) {
+    return res.status(400).json({ 
+      msg: "Missing required parameters: date and userID must be provided.",
+      received: { date, userID }
+    });
+  }
 
+  const query = "SELECT * FROM MealByDate WHERE userId = ? AND mealDate = ?";
   db.execute(query, [userID, date], (error, result) => {
     if (error) {
-      res.status(500).json({ msg: "Database error" + error });
+      logger.error("Database error:", error); // Log the full error
+      res.status(500).json({ msg: "Database error: " + error.message });
     } else {
       res.status(200).json({ meals: result });
     }
@@ -102,20 +117,20 @@ router.post("/addtargetmeal", cors, async (req, res) => {
   const {
     userId,
     mealDate,
-    mealName,
+    name,
     quantity,
     kcal,
     p,
     c,
     f,
     image,
-    foodType,
+    isVeg,
     mealType,
   } = req.body;
 
   const query = `
         INSERT INTO MealByDate (
-          userId, mealDate, mealName, quantity, kcal, p, c, f, image, foodType, mealType , isSelected, isTargetMeal
+          userId, mealDate, name, quantity, kcal, p, c, f, image, isVeg, mealType, isSelected, isTargetMeal
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1)
       `;
 
@@ -124,14 +139,14 @@ router.post("/addtargetmeal", cors, async (req, res) => {
     [
       userId,
       mealDate,
-      mealName,
+      name,
       quantity,
       kcal,
       p,
       c,
       f,
       image,
-      foodType,
+      isVeg,
       mealType,
     ],
     (error, result) => {
