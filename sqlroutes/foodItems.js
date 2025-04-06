@@ -1,3 +1,7 @@
+// foodItems.js
+// This file contains the routes for the food items table in the database.
+// It provides endpoints for CRUD operations on the food items.
+
 const express = require("express");
 const db = require("../sqlconnection");
 const router = express.Router();

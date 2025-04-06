@@ -16,12 +16,25 @@ const foodItems = require("./sqlroutes/foodItems");
 const foodTemplates = require("./sqlroutes/foodTemplates");
 const dietPlans = require("./sqlroutes/dietPlans");
 const dietTemplates = require("./sqlroutes/dietTemplates");
+const passport = require('passport');
+const session = require('express-session');
 
 const app = express();
 const port = 3000;
 
 const { exec } = require("child_process");
 const cors = require("cors");
+
+// Session middleware
+app.use(session({
+  secret: process.env.GGP_SECRET_KEY || 'your_session_secret',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Initialize Passport and restore authentication state from session
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(
   cors({
@@ -31,6 +44,7 @@ app.use(
       "http://localhost:3000",
       "https://admindashboard-nu-lovat.vercel.app",
     ],
+    credentials: true
   })
 );
 // Handle preflight requests (OPTIONS)
