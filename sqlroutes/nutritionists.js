@@ -1,3 +1,8 @@
+// nutritionists.js
+// This file contains the routes for the nutritionists table in the database.
+// It provides endpoints for CRUD operations on the nutritionists table.
+
+
 const express = require("express");
 const db = require("../sqlconnection"); // Assuming this is your DB connection file
 const auth = require("../routes/auth"); // Assuming you have an authentication middleware
@@ -38,7 +43,7 @@ router.post("/nutritionists", (req, res) => {
         return res.status(500).json({ error: "Database error" });
       }
 
-      res.status(201).json({
+      res.status(201).json({ 
         message: "Nutritionist created successfully",
         nutritionist: {
           id: result.insertId,
