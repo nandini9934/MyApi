@@ -2,7 +2,7 @@ const mysql = require("mysql2");
 
 // Create a MySQL connection pool (recommended for better performance and scalability)
 const db = mysql.createPool({
-  host: "localhost", // Update with your MySQL host
+  host: "s769.use1.mysecurecloudhost.com", // Update with your MySQL host
   user: "gamescr1_ggp", // Update with your MySQL user
   password: "PuXgZRX-JHe!", // Update with your MySQL password
   database: "gamescr1_ggp", // Update with your MySQL database name
