@@ -130,5 +130,26 @@ router.get("/exercise", userAuth, (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// GET: Get all exercises assigned to the logged-in user for a specific date
+router.get("/user-exercises/:date", userAuth, (req, res) => {
+  const userId = req.userInfo.user.id;
+  const { date } = req.params;
+  const query = `
+    SELECT ue.id as userExerciseId, ue.date, e.*
+    FROM user_exercises ue
+    JOIN exercises e ON ue.exerciseId = e.id
+    WHERE ue.userId = ? AND ue.date = ?
+    ORDER BY ue.date DESC
+  `;
+  db.execute(query, [userId, date], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json(results);
+  });
+});
+
   
 module.exports = router;
