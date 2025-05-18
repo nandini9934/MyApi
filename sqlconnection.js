@@ -2,10 +2,10 @@ const mysql = require("mysql2");
 
 // Create a MySQL connection pool (recommended for better performance and scalability)
 const db = mysql.createPool({
-  host: "sql12.freesqldatabase.com", // Update with your MySQL host
-  user: "sql12779294", // Update with your MySQL user
-  password: "Z6KwBqxXlZ", // Update with your MySQL password
-  database: "sql12779294", // Update with your MySQL database name
+   host: "s769.use1.mysecurecloudhost.com", // Update with your MySQL host
+  user: "gamescr1_ggp", // Update with your MySQL user
+  password: "PuXgZRX-JHe!", // Update with your MySQL password
+  database: "gamescr1_ggp", // Update with your MySQL database name
   waitForConnections: true, // Makes sure connections are queued while waiting for an available one
   connectionLimit: 10, // Maximum number of connections to create in the pool
   queueLimit: 0, // Unlimited queue length (set a limit if needed)
