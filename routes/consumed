@@ -1,0 +1,117 @@
+const express = require("express");
+const db = require("../sqlconnection");
+const { userAuth } = require("../middleware/auth");
+const router = express.Router();
+
+/**
+ * POST /api/consumed/:date?foodId=2672
+ * Mark a food item as consumed (isSelected: true) for the authenticated user on a specific date
+ */
+router.post("/consumed/:date", userAuth, (req, res) => {
+  const userId = req.userInfo.user.id;
+  const { date } = req.params;
+  const { foodId } = req.query;
+
+  if (!date || !foodId) {
+    return res.status(400).json({ error: "date and foodId are required" });
+  }
+
+  const selectQuery = "SELECT * FROM target WHERE userId = ? AND date = ?";
+  db.execute(selectQuery, [userId, date], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error" });
+    if (results.length === 0) return res.status(404).json({});
+
+    let food_items = JSON.parse(results[0].food_items);
+    let updated = false;
+    let updatedItem = null;
+
+    food_items = food_items.map(item => {
+      if (String(item.id) === String(foodId)) {
+        item.isSelected = true;
+        updated = true;
+        updatedItem = item;
+      }
+      return item;
+    });
+
+    if (!updated) return res.status(404).json({});
+
+    const updateQuery = "UPDATE target SET food_items = ? WHERE userId = ? AND date = ?";
+    db.execute(updateQuery, [JSON.stringify(food_items), userId, date], (err2) => {
+      if (err2) return res.status(500).json({ error: "Database error" });
+      res.json({ foodId: updatedItem.id });
+    });
+  });
+});
+
+/**
+ * GET /api/consumed/:date
+ * Fetch all consumed (isSelected: true) food items for the authenticated user for a specific date
+ */
+router.get("/consumed/:date", userAuth, (req, res) => {
+  const userId = req.userInfo.user.id;
+  const { date } = req.params;
+
+  const query = "SELECT date, food_items FROM target WHERE userId = ? AND date = ?";
+  db.execute(query, [userId, date], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error" });
+    if (results.length === 0) return res.json([]);
+
+    const consumed = [];
+    results.forEach(row => {
+      const items = JSON.parse(row.food_items);
+      items.forEach(item => {
+        if (item.isSelected === true) {
+          consumed.push({ ...item, date: row.date });
+        }
+      });
+    });
+
+    res.json(consumed);
+  });
+});
+
+/**
+ * DELETE /api/consumed/:date?foodId=2672
+ * Unmark a food item as consumed (isSelected: false) for the authenticated user on a specific date
+ */
+router.delete("/consumed/:date", userAuth, (req, res) => {
+  const userId = req.userInfo.user.id;
+  const { date } = req.params;
+  const { foodId } = req.query;
+
+  if (!date || !foodId) {
+    return res.status(400).json({ error: "date and foodId are required" });
+  }
+
+  const selectQuery = "SELECT * FROM target WHERE userId = ? AND date = ?";
+  db.execute(selectQuery, [userId, date], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error" });
+    if (results.length === 0) return res.status(404).json({});
+
+    let food_items = JSON.parse(results[0].food_items);
+    let updated = false;
+    let updatedItem = null;
+
+    food_items = food_items.map(item => {
+      if (String(item.id) === String(foodId)) {
+        if (item.isSelected === true) {
+          item.isSelected = false;
+          updated = true;
+          updatedItem = item;
+        }
+      }
+      return item;
+    });
+
+    if (!updated) return res.status(404).json({});
+
+    const updateQuery = "UPDATE target SET food_items = ? WHERE userId = ? AND date = ?";
+    db.execute(updateQuery, [JSON.stringify(food_items), userId, date], (err2) => {
+      if (err2) return res.status(500).json({ error: "Database error" });
+      res.json({ foodId: updatedItem.id });
+    });
+  });
+});
+
+module.exports = router;
