@@ -22,6 +22,12 @@ router.post("/consumed/:date", userAuth, (req, res) => {
     if (results.length === 0) return res.status(404).json({});
 
     let food_items = JSON.parse(results[0].food_items);
+
+    // Flatten if nested
+    if (Array.isArray(food_items) && Array.isArray(food_items[0])) {
+      food_items = food_items.flat();
+    }
+
     let updated = false;
     let updatedItem = null;
 
@@ -90,6 +96,12 @@ router.delete("/consumed/:date", userAuth, (req, res) => {
     if (results.length === 0) return res.status(404).json({});
 
     let food_items = JSON.parse(results[0].food_items);
+
+    // Flatten if nested
+    if (Array.isArray(food_items) && Array.isArray(food_items[0])) {
+      food_items = food_items.flat();
+    }
+
     let updated = false;
     let updatedItem = null;
 
