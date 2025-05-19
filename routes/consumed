@@ -4,13 +4,12 @@ const { userAuth } = require("../middleware/auth");
 const router = express.Router();
 
 /**
- * POST /api/consumed/:date?foodId=2672
+ * POST /api/consumed?date=2025-05-17&foodId=5
  * Mark a food item as consumed (isSelected: true) for the authenticated user on a specific date
  */
-router.post("/consumed/:date", userAuth, (req, res) => {
+router.post("/consumed", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
-  const { date } = req.params;
-  const { foodId } = req.query;
+  const { date, foodId } = req.query;
 
   if (!date || !foodId) {
     return res.status(400).json({ error: "date and foodId are required" });
