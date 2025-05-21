@@ -4,8 +4,9 @@ const { userAuth } = require("../middleware/auth");
 const router = express.Router();
 
 /**
- * POST /api/consumed?date=2025-05-17&foodId=5
- * Mark a food item as consumed (isSelected: true) for the authenticated user on a specific date
+ * POST /api/consumed
+ * Mark as consumed *and* update target.isConsumed = 1.
+ * QUERY: ?date=<date>&foodId=<number>
  */
 router.post("/consumed", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
@@ -15,113 +16,100 @@ router.post("/consumed", userAuth, (req, res) => {
     return res.status(400).json({ error: "date and foodId are required" });
   }
 
-  const selectQuery = "SELECT * FROM target WHERE userId = ? AND date = ?";
-  db.execute(selectQuery, [userId, date], (err, results) => {
+  const insert = `
+    INSERT INTO consumed_food (userId, date, foodId)
+    VALUES (?, ?, ?)
+    ON DUPLICATE KEY UPDATE createdAt = CURRENT_TIMESTAMP
+  `;
+
+  db.execute(insert, [userId, date, foodId], (err) => {
     if (err) return res.status(500).json({ error: "Database error" });
-    if (results.length === 0) return res.status(404).json({});
 
-    let food_items = JSON.parse(results[0].food_items);
-
-    // Flatten if nested
-    if (Array.isArray(food_items) && Array.isArray(food_items[0])) {
-      food_items = food_items.flat();
-    }
-
-    let updated = false;
-    let updatedItem = null;
-
-    food_items = food_items.map(item => {
-      if (String(item.id) === String(foodId)) {
-        item.isSelected = true;
-        updated = true;
-        updatedItem = item;
-      }
-      return item;
+    const upd = `
+      UPDATE target
+         SET isConsumed = 1
+       WHERE userId = ? AND date = ? AND foodId = ?
+    `;
+    db.execute(upd, [userId, date, foodId], (err2) => {
+      if (err2) console.error("Warning: failed to update target flag", err2);
     });
 
-    if (!updated) return res.status(404).json({});
-
-    const updateQuery = "UPDATE target SET food_items = ? WHERE userId = ? AND date = ?";
-    db.execute(updateQuery, [JSON.stringify(food_items), userId, date], (err2) => {
-      if (err2) return res.status(500).json({ error: "Database error" });
-      res.json({ foodId: updatedItem.id });
-    });
+    res.status(200).json({ message: "Marked as consumed" });
   });
 });
 
 /**
  * GET /api/consumed/:date
- * Fetch all consumed (isSelected: true) food items for the authenticated user for a specific date
+ * Retrieve consumed foods for a specific date.
  */
 router.get("/consumed/:date", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = userInfo.user.id;
   const { date } = req.params;
 
-  const query = "SELECT date, food_items FROM target WHERE userId = ? AND date = ?";
-  db.execute(query, [userId, date], (err, results) => {
-    if (err) return res.status(500).json({ error: "Database error" });
-    if (results.length === 0) return res.json([]);
+  if (!date) {
+    return res.status(400).json({ error: "date is required" });
+  }
 
-    const consumed = [];
-    results.forEach(row => {
-      const items = JSON.parse(row.food_items);
-      items.forEach(item => {
-        if (item.isSelected === true) {
-          consumed.push({ ...item, date: row.date });
-        }
-      });
-    });
-
-    res.json(consumed);
+  const query = `
+    SELECT
+      cf.foodId AS id,
+      f.name,
+      f.kcal,
+      f.p, f.c, f.f,
+      f.image,
+      f.isVeg,
+      f.mealType,
+      f.recipe
+    FROM consumed_food AS cf
+    JOIN food_items AS f
+      ON cf.foodId = f.id
+    WHERE cf.userId = ?
+      AND cf.date = ?
+    ORDER BY f.mealType, f.name
+  `;
+  db.execute(query, [userId, date], (err, rows) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json(rows);
   });
 });
 
 /**
- * DELETE /api/consumed/:date?foodId=2672
- * Unmark a food item as consumed (isSelected: false) for the authenticated user on a specific date
+ * DELETE /api/consumed
+ * Unmark consumed *and* update target.isConsumed = 0.
+ * QUERY: ?date=<date>&foodId=<number>
  */
-router.delete("/consumed/:date", userAuth, (req, res) => {
+router.delete("/consumed", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
-  const { date } = req.params;
-  const { foodId } = req.query;
+  const { date, foodId } = req.query;
 
   if (!date || !foodId) {
     return res.status(400).json({ error: "date and foodId are required" });
   }
 
-  const selectQuery = "SELECT * FROM target WHERE userId = ? AND date = ?";
-  db.execute(selectQuery, [userId, date], (err, results) => {
+  const del = `
+    DELETE FROM consumed_food
+     WHERE userId = ? AND date = ? AND foodId = ?
+  `;
+  db.execute(del, [userId, date, foodId], (err, result) => {
     if (err) return res.status(500).json({ error: "Database error" });
-    if (results.length === 0) return res.status(404).json({});
 
-    let food_items = JSON.parse(results[0].food_items);
-
-    // Flatten if nested
-    if (Array.isArray(food_items) && Array.isArray(food_items[0])) {
-      food_items = food_items.flat();
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Not marked consumed" });
     }
 
-    let updated = false;
-    let updatedItem = null;
-
-    food_items = food_items.map(item => {
-      if (String(item.id) === String(foodId)) {
-        if (item.isSelected === true) {
-          item.isSelected = false;
-          updated = true;
-          updatedItem = item;
-        }
-      }
-      return item;
+    const upd = `
+      UPDATE target
+         SET isConsumed = 0
+       WHERE userId = ? AND date = ? AND foodId = ?
+    `;
+    db.execute(upd, [userId, date, foodId], (err2) => {
+      if (err2) console.error("Warning: failed to update target flag", err2);
     });
 
-    if (!updated) return res.status(404).json({});
-
-    const updateQuery = "UPDATE target SET food_items = ? WHERE userId = ? AND date = ?";
-    db.execute(updateQuery, [JSON.stringify(food_items), userId, date], (err2) => {
-      if (err2) return res.status(500).json({ error: "Database error" });
-      res.json({ foodId: updatedItem.id });
-    });
+    res.json({ message: "Unmarked as consumed" });
   });
 });
 
