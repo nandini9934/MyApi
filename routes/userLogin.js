@@ -17,12 +17,65 @@ const apiKeyMiddleware = require("../middleware/apikeymiddleware");
 // Initialize passport
 require('../config/passport');
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Authentication
+ *     description: User authentication endpoints
+ *   - name: User Data
+ *     description: User profile data management
+ *   - name: Account Management
+ *     description: Account verification and password management
+ *   - name: OAuth
+ *     description: Google OAuth authentication endpoints
+ */
+
+/**
+ * @swagger
+ * api/auth/google:
+ *   get:
+ *     tags: [OAuth]
+ *     summary: Initiate Google OAuth authentication
+ *     description: Redirects to Google's OAuth consent screen
+ *     responses:
+ *       302:
+ *         description: Redirect to Google OAuth
+ *         headers:
+ *           Location:
+ *             schema:
+ *               type: string
+ *               example: https://accounts.google.com/o/oauth2/v2/auth?scope=profile%20email
+ */
+
 // Google OAuth login route
 router.get('/auth/google',
   passport.authenticate('google', {
     scope: ['profile', 'email']
   })
 );
+
+/**
+ * @swagger
+ * api/auth/google/callback:
+ *   get:
+ *     tags: [OAuth]
+ *     summary: Google OAuth callback
+ *     description: Handles Google OAuth callback and redirects with token
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         schema:
+ *           type: string
+ *         description: Authorization code from Google
+ *     responses:
+ *       302:
+ *         description: Redirect to frontend with JWT token
+ *         headers:
+ *           Location:
+ *             schema:
+ *               type: string
+ *               example: https://frontend.com/auth-success?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ */
 
 // Google OAuth callback route
 router.get('/auth/google/callback',
@@ -35,6 +88,38 @@ router.get('/auth/google/callback',
     res.redirect(`${process.env.FRONTEND_URL}/auth-success?token=${token}`);
   }
 );
+
+/**
+ * @swagger
+ * api/signup:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User registered successfully
+ *       400:
+ *         description: Missing required fields or user already exists
+ *       500:
+ *         description: Server error
+ */
 
 router.post("/signup", async (req, res) => {
   try {
@@ -112,6 +197,28 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * api/users:
+ *   get:
+ *     tags: [User Data]
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 Users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Database error
+ */
+
 router.get("/users", async (req, res) => {
   const query = "SELECT * FROM UserLogins";
   db.execute(query, (err, results) => {
@@ -123,6 +230,44 @@ router.get("/users", async (req, res) => {
     }
   });
 });
+
+/**
+ * @swagger
+ * api/login:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: User login
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Invalid credentials
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 
 router.post("/login", cors, async (req, res) => {
   const { email, password } = req.body;
@@ -168,6 +313,29 @@ router.post("/login", cors, async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+
+/**
+ * @swagger
+ * api/userdata:
+ *   post:
+ *     tags: [User Data]
+ *     summary: Create or update user profile data
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserData'
+ *     responses:
+ *       201:
+ *         description: Data inserted successfully
+ *       200:
+ *         description: Data updated successfully
+ *       500:
+ *         description: Database error
+ */
 
 router.post("/userdata", userAuth, (req, res) => {
   const userID = req?.userInfo?.user?.id;
@@ -264,6 +432,30 @@ router.post("/userdata", userAuth, (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * api/verify-token:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Verify JWT token validity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       400:
+ *         description: Token required
+ *       401:
+ *         description: Invalid or expired token
+ */
+
 router.post("/verify-token", (req, res) => {
   const { token } = req.body;
   if (!token) {
@@ -276,6 +468,32 @@ router.post("/verify-token", (req, res) => {
     return res.status(401).json({ success: false, message: "Token is invalid or expired" });
   }
 });
+
+/**
+ * @swagger
+ * api/verifyuser:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Verify user account
+ *     security:
+ *       - apiKey: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Account activated successfully
+ *       400:
+ *         description: Invalid token payload
+ *       500:
+ *         description: Database error
+ */
 
 router.post("/verifyuser", apiKeyMiddleware, (req, res) => {
   try {
@@ -343,6 +561,32 @@ router.post("/verifyuser", apiKeyMiddleware, (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * api/forgot-password:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Initiate password reset
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       400:
+ *         description: Email required
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+
 // POST /forgot-password
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -381,6 +625,37 @@ router.post("/forgot-password", async (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * api/reset-password:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Reset user password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Database error
+ */
+
 // POST /reset-password
 router.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
@@ -403,6 +678,23 @@ router.post("/reset-password", async (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * api/delete-account:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Delete user account
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *       404:
+ *         description: Account not found
+ *       500:
+ *         description: Database error
+ */
+
 // POST /delete-account
 router.post("/delete-account", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
@@ -418,6 +710,23 @@ router.post("/delete-account", userAuth, (req, res) => {
     res.status(200).json({ message: "Account deleted successfully" });
   });
 });
+
+/**
+ * @swagger
+ * api/deactivate-subscription:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Deactivate user subscription
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Subscription deactivated
+ *       404:
+ *         description: Account not found
+ *       500:
+ *         description: Database error
+ */
 
 // POST /deactivate-subscription
 router.post("/deactivate-subscription", userAuth, (req, res) => {
@@ -435,6 +744,24 @@ router.post("/deactivate-subscription", userAuth, (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * api/version:
+ *   get:
+ *     summary: Get API version
+ *     responses:
+ *       200:
+ *         description: API version information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ */
+
 router.get("/version", cors, async (req, res) => {
   try {
     res.status(200).json({ version: "1.0.0" }); // Send saved sale as a response
@@ -442,5 +769,61 @@ router.get("/version", cors, async (req, res) => {
     res.status(500).json({ message: "Error fecthing version" });
   }
 });
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *     apiKey:
+ *       type: apiKey
+ *       in: header
+ *       name: X-API-Key
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         signupdate:
+ *           type: string
+ *           format: date-time
+ *         auth_provider:
+ *           type: string
+ *     UserData:
+ *       type: object
+ *       properties:
+ *         gender:
+ *           type: string
+ *         dob:
+ *           type: string
+ *           format: date
+ *         height:
+ *           type: number
+ *         weight:
+ *           type: number
+ *         medical:
+ *           type: string
+ *         goal:
+ *           type: string
+ *         bodyfat:
+ *           type: number
+ *         workout:
+ *           type: string
+ *         food:
+ *           type: string
+ *         occupation:
+ *           type: string
+ *         targetWeight:
+ *           type: number
+ */
+
 
 module.exports = router;

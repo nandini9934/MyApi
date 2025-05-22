@@ -5,52 +5,130 @@ const router = express.Router();
 const logger = require("../logger");
 const { userAuth } = require("../middleware/auth");
 
-// Create Exercise
+/**
+ * @swagger
+ * /api/exercise:
+ *   post:
+ *     summary: Create a new exercise
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - exerciseName
+ *               - type
+ *               - videoLink
+ *               - muscleType
+ *             properties:
+ *               exerciseName:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               videoLink:
+ *                 type: string
+ *               muscleType:
+ *                 type: string
+ *               workoutSteps:
+ *                 type: string
+ *               exerciseStatus:
+ *                 type: integer
+ *               workoutImage:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Exercise created successfully
+ *       500:
+ *         description: Database or server error
+ */
 router.post("/exercise", userAuth, (req, res) => {
-  try {
-    const { exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage } = req.body;
+  const { exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage } = req.body;
 
-    const query = "INSERT INTO exercises (exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  const query = "INSERT INTO exercises (exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    db.execute(
-      query,
-      [
-        exerciseName,
-        type,
-        videoLink,
-        muscleType,
-        workoutSteps || null,
-        exerciseStatus !== undefined ? exerciseStatus : 1,
-        workoutImage || null
-      ],
-      (err, result) => {
-        if (err) {
-          console.error("Database error:", err);
-          return res.status(500).json({ error: "Database error" });
-        }
-
-        res.status(201).json({
-          message: "Exercise created successfully",
-          exercise: {
-            id: result.insertId,
-            exerciseName,
-            type,
-            videoLink,
-            muscleType,
-            workoutSteps,
-            exerciseStatus: exerciseStatus !== undefined ? exerciseStatus : 1,
-            workoutImage
-          }
-        });
+  db.execute(
+    query,
+    [
+      exerciseName,
+      type,
+      videoLink,
+      muscleType,
+      workoutSteps || null,
+      exerciseStatus !== undefined ? exerciseStatus : 1,
+      workoutImage || null
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
       }
-    );
-  } catch (err) {
-    console.error("Server error:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
+
+      res.status(201).json({
+        message: "Exercise created successfully",
+        exercise: {
+          id: result.insertId,
+          exerciseName,
+          type,
+          videoLink,
+          muscleType,
+          workoutSteps,
+          exerciseStatus: exerciseStatus !== undefined ? exerciseStatus : 1,
+          workoutImage
+        }
+      });
+    }
+  );
 });
 
-// Update Exercise
+/**
+ * @swagger
+ * /api/exercise/{id}:
+ *   put:
+ *     summary: Update an existing exercise by ID
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exercise ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - exerciseName
+ *               - type
+ *               - videoLink
+ *               - muscleType
+ *             properties:
+ *               exerciseName:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               videoLink:
+ *                 type: string
+ *               muscleType:
+ *                 type: string
+ *               workoutSteps:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Exercise updated successfully
+ *       404:
+ *         description: Exercise not found
+ *       500:
+ *         description: Database error
+ */
 router.put("/exercise/:id", userAuth, (req, res) => {
   const { id } = req.params;
   const { exerciseName, type, videoLink, muscleType, workoutSteps } = req.body;
@@ -74,12 +152,41 @@ router.put("/exercise/:id", userAuth, (req, res) => {
   });
 });
 
-// Add Exercise to User (Assign an Exercise to a User)
+/**
+ * @swagger
+ * /api/add-exercise:
+ *   post:
+ *     summary: Assign an exercise to the logged-in user
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - exerciseId
+ *               - date
+ *             properties:
+ *               exerciseId:
+ *                 type: integer
+ *               date:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       201:
+ *         description: Exercise assigned to user
+ *       404:
+ *         description: Exercise not found
+ *       500:
+ *         description: Database error
+ */
 router.post("/add-exercise", userAuth, (req, res) => {
   const { exerciseId, date } = req.body;
-  const userId = req.userInfo.user.id; // Assuming you attach user ID from token
+  const userId = req.userInfo.user.id;
 
-  // Check if exercise exists
   const checkExerciseQuery = "SELECT * FROM exercises WHERE id = ?";
   db.execute(checkExerciseQuery, [exerciseId], (err, results) => {
     if (err) {
@@ -91,7 +198,6 @@ router.post("/add-exercise", userAuth, (req, res) => {
       return res.status(404).json({ message: "Exercise not found" });
     }
 
-    // Insert the exercise into user-exercises table
     const insertQuery = "INSERT INTO user_exercises (userId, exerciseId, date) VALUES (?, ?, ?)";
     db.execute(insertQuery, [userId, exerciseId, date], (err, result) => {
       if (err) {
@@ -107,31 +213,54 @@ router.post("/add-exercise", userAuth, (req, res) => {
   });
 });
 
-// GET: Get all exercises (public)
+/**
+ * @swagger
+ * /api/exercise:
+ *   get:
+ *     summary: Get all exercises
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all exercises
+ *       500:
+ *         description: Database error
+ */
 router.get("/exercise", userAuth, (req, res) => {
-  try {
-    const query = "SELECT * FROM exercises";
-    db.execute(query, (err, results) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: "Database error" });
-      }
+  const query = "SELECT * FROM exercises";
+  db.execute(query, (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
 
-      // If no exercises are found, return an empty array
-      if (results.length === 0) {
-        return res.json([]);
-      }
-
-      // Respond with the list of exercises (array only)
-      res.json(results);
-    });
-  } catch (err) {
-    console.error("Server error:", err.message);
-    res.status(500).send("Server error");
-  }
+    res.json(results);
+  });
 });
 
-// GET: Get all exercises assigned to the logged-in user for a specific date
+/**
+ * @swagger
+ * /api/user-exercises/{date}:
+ *   get:
+ *     summary: Get all exercises assigned to the logged-in user for a specific date
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date for which exercises are fetched
+ *     responses:
+ *       200:
+ *         description: List of assigned exercises
+ *       500:
+ *         description: Database error
+ */
 router.get("/user-exercises/:date", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
   const { date } = req.params;
@@ -151,5 +280,4 @@ router.get("/user-exercises/:date", userAuth, (req, res) => {
   });
 });
 
-  
 module.exports = router;

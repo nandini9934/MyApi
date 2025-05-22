@@ -14,6 +14,14 @@ const userMeta = require("./routes/userMeta");
 const waterSleep = require("./routes/waterSleep");
 const appointments = require("./routes/appointments");
 
+const nutritionistLogin = require("./routes/nutritionistLogin");
+const nutritionistRoutes = require("./routes/nutritionistRoutes");
+const foodTemplates = require("./routes/foodTemplates");
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerSpec = require("./swagger");
+
 const app = express();
 const port = 3000;
 
@@ -72,6 +80,12 @@ app.use("/api", exercise);
 app.use("/api", userMeta);
 app.use("/api", waterSleep);
 app.use("/api", appointments);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use("/api", nutritionistLogin);
+app.use("/api", nutritionistRoutes);
+app.use("/api", foodTemplates);
 
 app.get("/test", (req, res) => {
   res.send("App restartedss");

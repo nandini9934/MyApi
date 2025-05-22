@@ -4,9 +4,36 @@ const { userAuth } = require("../middleware/auth");
 const router = express.Router();
 
 /**
- * POST /api/target
- * Add ONE foodId to the target for a user/date.
- * QUERY: ?date=<date>&foodId=<number>
+ * @swagger
+ * /api/target:
+ *   post:
+ *     summary: Add a food item to the user's target for a given date
+ *     tags: [Target]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The date for which the food is being added
+ *       - in: query
+ *         name: foodId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the food item
+ *     responses:
+ *       201:
+ *         description: Food item added to target
+ *       400:
+ *         description: Missing date or foodId
+ *       409:
+ *         description: Already in target
+ *       500:
+ *         description: Database error
  */
 router.post("/target", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
@@ -33,8 +60,26 @@ router.post("/target", userAuth, (req, res) => {
 });
 
 /**
- * GET /api/target/:date
- * List all planned foods (with full data + persisted isConsumed flag).
+ * @swagger
+ * /api/target/{date}:
+ *   get:
+ *     summary: Get all planned food items for a given date
+ *     tags: [Target]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The date to retrieve the food plan for
+ *     responses:
+ *       200:
+ *         description: List of food items with target status
+ *       500:
+ *         description: Database error
  */
 router.get("/target/:date", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;
@@ -70,9 +115,36 @@ router.get("/target/:date", userAuth, (req, res) => {
 });
 
 /**
- * DELETE /api/target
- * Remove ONE foodId from the target for a user/date.
- * QUERY: ?date=<date>&foodId=<number>
+ * @swagger
+ * /api/target:
+ *   delete:
+ *     summary: Remove a food item from the user's target for a given date
+ *     tags: [Target]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The date from which the food item is to be removed
+ *       - in: query
+ *         name: foodId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the food item to remove
+ *     responses:
+ *       200:
+ *         description: Successfully removed from target
+ *       400:
+ *         description: Missing date or foodId
+ *       404:
+ *         description: Not found in target
+ *       500:
+ *         description: Database error
  */
 router.delete("/target", userAuth, (req, res) => {
   const userId = req.userInfo.user.id;

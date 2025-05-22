@@ -4,6 +4,35 @@ const db = require("../sqlconnection");
 const router = express.Router();
 const { userAuth } = require("../middleware/auth");
 
+/**
+ * @swagger
+ * tags:
+ *   - name: User Metadata
+ *     description: User metadata management endpoints
+ */
+
+/**
+ * @swagger
+ * api/metadata:
+ *   get:
+ *     tags: [User Metadata]
+ *     summary: Get complete user metadata
+ *     description: Retrieve combined user data from UserData and UserLogins tables
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful retrieval of user metadata
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Metadata'
+ *       404:
+ *         description: User metadata not found
+ *       500:
+ *         description: Database error
+ */
+
 // GET: Get user metadata (user auth required)
 router.get("/metadata", userAuth, (req, res) => {
   const userID = req.userInfo.user.id;
@@ -36,6 +65,32 @@ router.get("/metadata", userAuth, (req, res) => {
     res.json(results[0]);
   });
 });
+
+/**
+ * @swagger
+ * api/metadata:
+ *   put:
+ *     tags: [User Metadata]
+ *     summary: Update user metadata
+ *     description: Update partial user metadata fields (requires authentication)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MetadataUpdate'
+ *     responses:
+ *       200:
+ *         description: Metadata updated successfully
+ *       400:
+ *         description: Invalid fields or bad request
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Database error
+ */
 
 // PUT: Update user metadata (user auth required)
 router.put("/metadata", userAuth, (req, res) => {
@@ -88,5 +143,81 @@ router.put("/metadata", userAuth, (req, res) => {
     res.json({ message: "User metadata updated successfully" });
   });
 });
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     Metadata:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         gender:
+ *           type: string
+ *         dob:
+ *           type: string
+ *           format: date
+ *         height:
+ *           type: number
+ *         weight:
+ *           type: number
+ *         medical:
+ *           type: string
+ *         goal:
+ *           type: string
+ *         bodyfat:
+ *           type: number
+ *         workout:
+ *           type: string
+ *         food:
+ *           type: string
+ *         occupation:
+ *           type: string
+ *         onboarded:
+ *           type: boolean
+ *         targetWeight:
+ *           type: number
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         isSubscribed:
+ *           type: boolean
+ * 
+ *     MetadataUpdate:
+ *       type: object
+ *       properties:
+ *         gender:
+ *           type: string
+ *         dob:
+ *           type: string
+ *           format: date
+ *         height:
+ *           type: number
+ *         weight:
+ *           type: number
+ *         medical:
+ *           type: string
+ *         goal:
+ *           type: string
+ *         bodyfat:
+ *           type: number
+ *         workout:
+ *           type: string
+ *         food:
+ *           type: string
+ *         occupation:
+ *           type: string
+ *         onboarded:
+ *           type: boolean
+ *         targetWeight:
+ *           type: number
+ */
 
 module.exports = router;
