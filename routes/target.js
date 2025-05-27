@@ -190,66 +190,6 @@ router.post("/target/assignTemplate", userAuth(["nutritionist"]), async (req, re
 
 /**
  * @swagger
- * /api/target/clientTemplates/{clientId}:
- *   get:
- *     summary: Get all templates assigned to a client
- *     tags: [Targets]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: clientId
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID of the client
- *     responses:
- *       200:
- *         description: List of templates assigned to the client
- *       403:
- *         description: Client not assigned to this nutritionist
- *       500:
- *         description: Database error
- */
-// Get all templates assigned to a client (nutritionist only)
-router.get("/target/clientTemplates/:clientId", userAuth(["nutritionist"]), (req, res) => {
-  const nutritionistId = req.userInfo.id;
-  const { clientId } = req.params;
-
-  // Check if client is assigned to this nutritionist
-  const checkAssignmentQuery = `
-    SELECT 1 FROM nutritionist_client 
-    WHERE client_id = ? AND nutritionist_id = ?
-  `;
-  db.execute(checkAssignmentQuery, [clientId, nutritionistId], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Database error" });
-    }
-    if (results.length === 0) {
-      return res.status(403).json({ error: "Client not assigned to this nutritionist" });
-    }
-
-    // Get all templates assigned to this client
-    const query = `
-      SELECT ct.*, ft.food_ids
-      FROM client_templates ct
-      JOIN food_templates ft ON ct.template_id = ft.id
-      WHERE ct.client_id = ? AND ct.nutritionist_id = ?
-      ORDER BY ct.start_date DESC
-    `;
-    db.execute(query, [clientId, nutritionistId], (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Database error" });
-      }
-      res.status(200).json({ templates: results });
-    });
-  });
-});
-
-/**
- * @swagger
  * /api/target/templateFood/{templateId}:
  *   get:
  *     summary: Get food items from a template
