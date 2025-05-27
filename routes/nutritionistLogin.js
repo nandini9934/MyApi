@@ -7,6 +7,78 @@ const { userAuth } = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const ggpKey = process.env.GGP_SECRET_KEY;
 
+/**
+ * @swagger
+ * /api/nutritionistSignUp:
+ *   post:
+ *     summary: Register a new nutritionist
+ *     description: Create a new nutritionist account with the provided details
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - first_name
+ *               - last_name
+ *               - email
+ *               - phone_number
+ *               - specialty
+ *               - years_of_experience
+ *               - current_organisation
+ *               - address
+ *               - password
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 example: "John"
+ *               last_name:
+ *                 type: string
+ *                 example: "Doe"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "john.doe@example.com"
+ *               phone_number:
+ *                 type: string
+ *                 example: "1234567890"
+ *               specialty:
+ *                 type: string
+ *                 example: "Sports Nutrition"
+ *               years_of_experience:
+ *                 type: integer
+ *                 example: 5
+ *               current_organisation:
+ *                 type: string
+ *                 example: "Healthy Living Clinic"
+ *               address:
+ *                 type: string
+ *                 example: "123 Health Street, Nutrition City"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "securePassword123!"
+ *     responses:
+ *       201:
+ *         description: Nutritionist registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Nutritionist registered successfully"
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         description: Missing required fields or email already registered
+ *       500:
+ *         description: Server error
+ */
 router.post("/nutritionistSignUp", async (req, res) => {
   const {
     first_name,
@@ -84,6 +156,67 @@ router.post("/nutritionistSignUp", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/nutritionistSignIn:
+ *   post:
+ *     summary: Authenticate nutritionist and get token
+ *     description: Sign in a nutritionist with email and password to receive an authentication token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - PASSWORD
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "john.doe@example.com"
+ *               PASSWORD:
+ *                 type: string
+ *                 format: password
+ *                 example: "securePassword123!"
+ *     responses:
+ *       200:
+ *         description: Successfully authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Login successful"
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 nutritionist:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     email:
+ *                       type: string
+ *                       example: "john.doe@example.com"
+ *                     first_name:
+ *                       type: string
+ *                       example: "John"
+ *                     last_name:
+ *                       type: string
+ *                       example: "Doe"
+ *       400:
+ *         description: Email and password are required
+ *       401:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Server error
+ */
 router.post("/nutritionistSignIn", (req, res) => {
   const { email, PASSWORD } = req.body;
 
@@ -139,6 +272,61 @@ router.post("/nutritionistSignIn", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/nutritionistUpdate:
+ *   put:
+ *     summary: Update nutritionist profile
+ *     description: Update nutritionist's profile information (at least one field required)
+ *     tags: [Nutritionist]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 example: "John"
+ *               last_name:
+ *                 type: string
+ *                 example: "Doe"
+ *               phone_number:
+ *                 type: string
+ *                 example: "1234567890"
+ *               specialty:
+ *                 type: string
+ *                 example: "Sports Nutrition"
+ *               years_of_experience:
+ *                 type: integer
+ *                 example: 6
+ *               current_organisation:
+ *                 type: string
+ *                 example: "Healthy Living Clinic"
+ *               address:
+ *                 type: string
+ *                 example: "123 Health Street, Nutrition City"
+ *     responses:
+ *       200:
+ *         description: Nutritionist profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully"
+ *       400:
+ *         description: No fields provided for update
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
 router.put("/nutritionistUpdate", userAuth("nutritionist"), (req, res) => {
   const {
     first_name,
