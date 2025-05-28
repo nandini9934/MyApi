@@ -42,7 +42,7 @@ const router = express.Router();
  *       500:
  *         description: Database error
  */
-router.post("/target/nutritionist", userAuth("nutritionist"), (req, res) => {
+router.post("/target/nutritionist", userAuth("user"), (req, res) => {
   const nutritionistId = req.userInfo.id;
   const { clientId, date, foodId } = req.query;
 
@@ -90,26 +90,39 @@ router.post("/target/nutritionist", userAuth("nutritionist"), (req, res) => {
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: body
- *         name: templateAssignment
+ *       - in: query
+ *         name: templateId
  *         required: true
  *         schema:
- *           type: object
- *           required:
- *             - templateId
- *             - clientId
- *             - startDate
- *           properties:
- *             templateId:
- *               type: integer
- *               description: ID of the food template
- *             clientId:
- *               type: integer
- *               description: ID of the client
- *             startDate:
- *               type: string
- *               format: date
- *               description: Start date for the template
+ *           type: integer
+ *         description: ID of the food template
+ *       - in: query
+ *         name: clientId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the client
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for the template
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - foodIds
+ *             properties:
+ *               foodIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: Array of food item IDs to add to target
  *     responses:
  *       201:
  *         description: Template assigned successfully
@@ -123,12 +136,17 @@ router.post("/target/nutritionist", userAuth("nutritionist"), (req, res) => {
  *         description: Database error
  */
 // Assign a template to a client (nutritionist only)
-router.post("/target/assignTemplate", userAuth(["nutritionist"]), async (req, res) => {
+router.post("/target/assignTemplate", userAuth("nutritionist"), async (req, res) => {
   const nutritionistId = req.userInfo.id;
-  const { templateId, clientId, startDate } = req.body;
+  const { templateId, clientId, startDate } = req.query;
+  const { foodIds } = req.body;
 
   if (!templateId || !clientId || !startDate) {
-    return res.status(400).json({ error: "templateId, clientId, and startDate are required" });
+    return res.status(400).json({ error: "templateId, clientId, and startDate are required as query parameters" });
+  }
+  
+  if (!foodIds || !Array.isArray(foodIds)) {
+    return res.status(400).json({ error: "foodIds array is required in the request body" });
   }
 
   // Start a database transaction
@@ -148,9 +166,9 @@ router.post("/target/assignTemplate", userAuth(["nutritionist"]), async (req, re
       return res.status(403).json({ error: 'Client not assigned to this nutritionist' });
     }
 
-    // 2. Get template food items
+    // 2. Verify template exists and belongs to nutritionist
     const [template] = await connection.execute(
-      'SELECT food_ids FROM food_templates WHERE id = ? AND nutritionist_id = ?',
+      'SELECT 1 FROM food_templates WHERE id = ? AND nutritionist_id = ?',
       [templateId, nutritionistId]
     );
 
@@ -159,16 +177,10 @@ router.post("/target/assignTemplate", userAuth(["nutritionist"]), async (req, re
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    const foodIds = JSON.parse(template[0].food_ids);
-    if (!Array.isArray(foodIds) || foodIds.length === 0) {
-      await connection.rollback();
-      return res.status(400).json({ error: 'Template has no food items' });
-    }
-
     // 3. Insert each food item into target table
     const insertQuery = `
       INSERT INTO target
-      (userId, foodId, date, isConsumed, id, created_at)
+      (userId, foodId, date, isConsumed, nutritionistId, created_at)
       VALUES (?, ?, ?, 0, ?, NOW())
       ON DUPLICATE KEY UPDATE created_at = NOW()`;
 
@@ -212,9 +224,62 @@ router.post("/target/assignTemplate", userAuth(["nutritionist"]), async (req, re
  *         description: Database error
  */
 // Get food items from a template (nutritionist only)
-router.get("/target/templateFood/:templateId", userAuth(["nutritionist"]), (req, res) => {
+router.get("/target/templateFood/:templateId", userAuth("nutritionist"), (req, res) => {
   const nutritionistId = req.userInfo.id;
-  const { templateId } = req.params;
+  const { templateId } = req.params;// Get food items from a template (nutritionist only)
+  router.get("/target/templateFood/:templateId", userAuth("nutritionist"), (req, res) => {
+    const nutritionistId = req.userInfo.id;
+    const { templateId } = req.params;
+  
+    // First, get the food_ids from the template
+    const getTemplateQuery = `
+      SELECT food_ids 
+      FROM food_templates 
+      WHERE id = ? AND nutritionist_id = ?
+    `;
+    
+    db.execute(getTemplateQuery, [templateId, nutritionistId], (err, [template]) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+  
+      try {
+        // Parse the food_ids JSON array
+        const foodIds = JSON.parse(template.food_ids);
+        
+        if (!Array.isArray(foodIds) || foodIds.length === 0) {
+          return res.status(200).json({ foodItems: [] });
+        }
+  
+        // Create placeholders for the IN clause
+        const placeholders = foodIds.map(() => '?').join(',');
+        
+        // Get the food items
+        const getFoodItemsQuery = `
+          SELECT * 
+          FROM food_items 
+          WHERE id IN (${placeholders})
+        `;
+        
+        db.execute(getFoodItemsQuery, foodIds, (err, foodItems) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Error fetching food items" });
+          }
+          
+          res.status(200).json({ foodItems });
+        });
+      } catch (error) {
+        console.error('Error parsing food_ids:', error);
+        return res.status(500).json({ error: "Invalid template format" });
+      }
+    });
+  });
 
   // Get the template and its food items
   const query = `
@@ -276,8 +341,8 @@ router.get("/target/templateFood/:templateId", userAuth(["nutritionist"]), (req,
  *       500:
  *         description: Database error
  */
-router.post("/target", userAuth(["nutritionist"]), (req, res) => {
-  const nutritionistId = req.userInfo.id;
+router.post("/target", userAuth("user"), (req, res) => {
+  const userId = req.userInfo.id;
   const { date, foodId } = req.query;
 
   if (!date || !foodId) {

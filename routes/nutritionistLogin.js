@@ -406,6 +406,90 @@ router.put("/nutritionistUpdate", userAuth("nutritionist"), (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/nutritionist/delete-account:
+ *   delete:
+ *     summary: Delete nutritionist account
+ *     description: Deletes the authenticated nutritionist's account and all related data
+ *     tags: [Nutritionist]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Current password for verification
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *       400:
+ *         description: Password is required
+ *       401:
+ *         description: Invalid password
+ *       404:
+ *         description: Nutritionist not found
+ *       500:
+ *         description: Server error
+ */
+router.delete('/delete-account', userAuth, async (req, res) => {
+  const { password } = req.body;
+  const nutritionistId = req.user.id;
 
+  if (!password) {
+    return res.status(400).json({ message: 'Password is required' });
+  }
+
+  try {
+    // Verify password
+    const nutritionistQuery = 'SELECT password FROM nutritionists WHERE id = ?';
+    db.query(nutritionistQuery, [nutritionistId], async (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: 'Database error', error: err });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Nutritionist not found' });
+      }
+
+      const validPassword = await bcrypt.compare(password, results[0].password);
+      if (!validPassword) {
+        return res.status(401).json({ message: 'Invalid password' });
+      }
+
+      // Delete related data
+      const deleteQueries = [
+        // Delete client templates associated with this nutritionist
+        'DELETE FROM client_templates WHERE nutritionist_id = ?',
+        // Delete food templates created by this nutritionist
+        'DELETE FROM food_templates WHERE nutritionist_id = ?',
+        // Delete nutritionist account
+        'DELETE FROM nutritionists WHERE id = ?'
+      ];
+
+      // Execute all delete queries
+      for (const query of deleteQueries) {
+        db.query(query, [nutritionistId], (err) => {
+          if (err) {
+            console.error('Error deleting data:', err);
+          }
+        });
+      }
+
+      res.status(200).json({ message: 'Account deleted successfully' });
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
 
 module.exports = router;
