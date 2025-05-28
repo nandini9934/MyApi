@@ -772,6 +772,90 @@ router.get("/version", cors, async (req, res) => {
 
 /**
  * @swagger
+ * api/change-password:
+ *   post:
+ *     tags: [Account Management]
+ *     summary: Change user password (authenticated)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Missing required fields or new password same as current
+ *       401:
+ *         description: Invalid current password
+ *       500:
+ *         description: Database error
+ */
+
+// POST /change-password
+router.post("/change-password", userAuth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.userInfo.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current password and new password are required" });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: "New password must be different from current password" });
+    }
+
+    // Get current password hash from database
+    const getPasswordQuery = "SELECT password FROM UserLogins WHERE id = ?";
+    
+    db.execute(getPasswordQuery, [userId], async (err, results) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, results[0].password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password and update
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      const updateQuery = "UPDATE UserLogins SET password = ? WHERE id = ?";
+      db.execute(updateQuery, [hashedPassword, userId], (updateErr, result) => {
+        if (updateErr) {
+          console.error("Database error:", updateErr);
+          return res.status(500).json({ message: "Failed to update password" });
+        }
+        res.status(200).json({ message: "Password updated successfully" });
+      });
+    });
+  } catch (error) {
+    console.error("Error in change-password:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/**
+ * @swagger
  * components:
  *   securitySchemes:
  *     bearerAuth:
