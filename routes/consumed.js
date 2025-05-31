@@ -192,7 +192,6 @@ router.get("/consumed/:date", userAuth(), (req, res) => {
       ON cf.foodId = f.id
     WHERE cf.userId = ?
       AND cf.DATE = ?
-    ORDER BY f.name
   `;
   console.log("[DEBUG] Executing query", query);
   db.execute(query, [userId, date], (err, rows) => {

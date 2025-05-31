@@ -416,7 +416,6 @@ router.get("/target/:date", userAuth("user", "nutritionist"), (req, res) => {
       ON f.id = t.foodId
     WHERE t.userId = ?
       AND t.DATE   = ?
-    ORDER BY f.mealType, f.name
   `;
   db.execute(query, [nutritionistId, date], (err, rows) => {
     if (err) {
