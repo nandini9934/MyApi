@@ -93,21 +93,26 @@ const router = express.Router();
  *         description: Database error
  */
 router.post("/consumed", userAuth, (req, res) => {
-  // Existing code unchanged
-  const userId = req.userInfo.user.id;
-  const { date, foodId } = req.query;
+  const userId = req.userInfo.id;
+  let { date, foodId, mealType } = req.query;
 
-  if (!date || !foodId) {
-    return res.status(400).json({ error: "date and foodId are required" });
+  if (!date || !foodId || !mealType) {
+    return res.status(400).json({ error: "date, foodId, and mealType are required" });
+  }
+
+  // Convert mealType to a number
+  mealType = Number(mealType);
+  if (isNaN(mealType)) {
+    return res.status(400).json({ error: "mealType must be a number" });
   }
 
   const insert = `
-    INSERT INTO consumed_food (userId, date, foodId)
-    VALUES (?, ?, ?)
+    INSERT INTO consumed_food (userId, date, foodId, mealType)
+    VALUES (?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE createdAt = CURRENT_TIMESTAMP
   `;
 
-  db.execute(insert, [userId, date, foodId], (err) => {
+  db.execute(insert, [userId, date, foodId, mealType], (err) => {
     if (err) return res.status(500).json({ error: "Database error" });
 
     const upd = `
@@ -154,18 +159,22 @@ router.post("/consumed", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.get("/consumed/:date", userAuth, (req, res) => {
-  // Existing code unchanged
-  const userId = req.userInfo.user.id;
+router.get("/consumed/:date", userAuth(), (req, res) => {
+  // Debug log: entering route
+  console.log("[DEBUG] Entered /consumed/:date route");
+  const userId = req.userInfo.id;
   const { date } = req.params;
+  console.log(`[DEBUG] userId: ${userId}, date: ${date}`);
 
   if (!date) {
+    console.log("[DEBUG] No date provided");
     return res.status(400).json({ error: "date is required" });
   }
 
   const query = `
     SELECT
       cf.foodId AS id,
+      cf.mealType,
       f.name,
       f.kcal,
       f.p, f.c, f.f,
@@ -176,14 +185,16 @@ router.get("/consumed/:date", userAuth, (req, res) => {
     JOIN food_items AS f
       ON cf.foodId = f.id
     WHERE cf.userId = ?
-      AND cf.date = ?
+      AND cf.DATE = ?
     ORDER BY f.name
   `;
+  console.log("[DEBUG] Executing query", query);
   db.execute(query, [userId, date], (err, rows) => {
     if (err) {
-      console.error(err);
+      console.error("[DEBUG] DB error:", err);
       return res.status(500).json({ error: "Database error" });
     }
+    console.log(`[DEBUG] Query result:`, rows);
     res.json(rows);
   });
 });
@@ -232,7 +243,7 @@ router.get("/consumed/:date", userAuth, (req, res) => {
  */
 router.delete("/consumed", userAuth, (req, res) => {
   // Existing code unchanged
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date, foodId } = req.query;
 
   if (!date || !foodId) {

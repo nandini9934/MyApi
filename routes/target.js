@@ -397,20 +397,19 @@ router.get("/target/:date", userAuth("user", "nutritionist"), (req, res) => {
   const query = `
     SELECT
       t.foodId       AS id,
+      t.mealType,
       f.name,
       f.kcal,
       f.p, f.c, f.f,
       f.image,
       f.isVeg,
-      f.mealType,
       f.recipe,
       t.isConsumed
     FROM target AS t
     JOIN food_items AS f
       ON f.id = t.foodId
     WHERE t.userId = ?
-      AND t.date   = ?
-    ORDER BY f.mealType, f.name
+      AND t.DATE   = ?
   `;
   db.execute(query, [nutritionistId, date], (err, rows) => {
     if (err) {
