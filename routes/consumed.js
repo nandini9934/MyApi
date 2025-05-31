@@ -175,6 +175,12 @@ router.get("/consumed/:date", userAuth(), (req, res) => {
     SELECT
       cf.foodId AS id,
       cf.mealType,
+      CASE cf.mealType
+        WHEN 1 THEN 'Breakfast'
+        WHEN 2 THEN 'Lunch'
+        WHEN 3 THEN 'Dinner'
+        ELSE 'Other'
+      END AS mealTypeName,
       f.name,
       f.kcal,
       f.p, f.c, f.f,
