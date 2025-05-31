@@ -388,7 +388,7 @@ router.post("/target", userAuth("user"), (req, res) => {
  *         description: Database error
  */
 // Get target meals for a specific date (accessible by both clients and nutritionists)
-router.get("/target/:date", userAuth(["user", "nutritionist"]), (req, res) => {
+router.get("/target/:date", userAuth("user", "nutritionist"), (req, res) => {
   const nutritionistId = req.userInfo.id;
   const { date } = req.params;
 
@@ -455,7 +455,7 @@ router.get("/target/:date", userAuth(["user", "nutritionist"]), (req, res) => {
  *       500:
  *         description: Database error
  */
-router.delete("/target", userAuth(["user", "nutritionist"]), (req, res) => {
+router.delete("/target", userAuth("user", "nutritionist"), (req, res) => {
   // Get user ID based on role (user or nutritionist)
   const userId = req.userInfo.user?.id || req.userInfo.id;
   const { date, foodId } = req.query;
