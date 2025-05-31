@@ -36,6 +36,6 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22
         script: |
-          source /home/gamescr1/nodevenv/gamescreed.net/ggp/20/bin/activate && cd /home/gamescr1/gamescreed.net/ggp
-          ps ax | grep 'lsnode:/home/gamescr1/gamescreed.net/ggp/' | grep -v grep | awk '{print $1}' | xargs kill
+          source /home/gamescr1/nodevenv/api.goodgutproject.in/20/bin/activate && cd /home/gamescr1/api.goodgutproject.in
+          ps ax | grep 'lsnode:/home/gamescr1/api.goodgutproject.in' | grep -v grep | awk '{print $1}' | xargs kill
           curl https://api.goodgutproject.in/test
