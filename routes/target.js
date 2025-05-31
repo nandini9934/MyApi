@@ -452,7 +452,7 @@ router.get("/target/:date", userAuth("user", "nutritionist"), (req, res) => {
  *       404:
  *         description: Not found in target
  *       500:
- *         description: Database error
+ *         description: Database errorr
  */
 router.delete("/target", userAuth("user", "nutritionist"), (req, res) => {
   // Get user ID based on role (user or nutritionist)
