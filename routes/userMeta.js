@@ -34,8 +34,8 @@ const { userAuth } = require("../middleware/auth");
  */
 
 // GET: Get user metadata (user auth required)
-router.get("/metadata", userAuth, (req, res) => {
-  const userID = req.userInfo.user.id;
+router.get("/metadata", userAuth(), (req, res) => {
+  const userID = req.userInfo.id;
   console.log(`[GET /metadata] Request received from user ID: ${userID}`);
 
   const query = `
@@ -93,8 +93,8 @@ router.get("/metadata", userAuth, (req, res) => {
  */
 
 // PUT: Update user metadata (user auth required)
-router.put("/metadata", userAuth, (req, res) => {
-  const userID = req.userInfo.user.id;
+router.put("/metadata", userAuth(), (req, res) => {
+  const userID = req.userInfo.id;
   console.log(`[PUT /metadata] Update request received from user ID: ${userID}`);
   console.log("[PUT /metadata] Request body:", req.body);
 
