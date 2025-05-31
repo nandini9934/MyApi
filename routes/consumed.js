@@ -101,9 +101,10 @@ router.post("/consumed", userAuth(), (req, res) => {
   }
 
   // Convert mealType to a number
-  mealType = Number(mealType);
-  if (isNaN(mealType)) {
-    return res.status(400).json({ error: "mealType must be a number" });
+  const mealTypeMap = { Breakfast: 1, Lunch: 2, Dinner: 3 };
+  mealType = mealTypeMap[mealType];
+  if (!mealType) {
+    return res.status(400).json({ error: "mealType must be one of: Breakfast, Lunch, Dinner" });
   }
 
   const insert = `
