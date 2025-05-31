@@ -171,14 +171,13 @@ router.get("/consumed/:date", userAuth, (req, res) => {
       f.p, f.c, f.f,
       f.image,
       f.isVeg,
-      f.mealType,
       f.recipe
     FROM consumed_food AS cf
     JOIN food_items AS f
       ON cf.foodId = f.id
     WHERE cf.userId = ?
       AND cf.date = ?
-    ORDER BY f.mealType, f.name
+    ORDER BY f.name
   `;
   db.execute(query, [userId, date], (err, rows) => {
     if (err) {
