@@ -463,7 +463,7 @@ router.get("/target/:date", userAuth("user", "nutritionist"), (req, res) => {
  */
 router.delete("/target", userAuth("user", "nutritionist"), (req, res) => {
   // Get user ID based on role (user or nutritionist)
-  const userId = req.userInfo.user?.id || req.userInfo.id;
+  const userId = req.userInfo.id;
   const { date, foodId } = req.query;
 
   if (!date || !foodId) {

@@ -26,7 +26,7 @@ const router = express.Router();
  *         description: Database error
  */
 router.get("/appointments/user", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
 
   const query = `
     SELECT id, userId, expertId, date, timeSlot, topic, status, callId, createdAt, updatedAt
@@ -147,7 +147,7 @@ router.get("/appointments/available-slots/:date", userAuth, (req, res) => {
  *         description: Database error
  */
 router.post("/appointments", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date, timeSlot, topic, status } = req.body;
   const expertId = req.body.expertId || null;
   const id = "app_" + uuidv4();

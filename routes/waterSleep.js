@@ -47,7 +47,7 @@ const router = express.Router();
  */
 
 router.get("/water-sleep/:date", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date } = req.params;
   const query = "SELECT glasses_of_water, hours_of_sleep FROM water_sleep WHERE userId = ? AND date = ?";
   db.execute(query, [userId, date], (err, results) => {
@@ -104,7 +104,7 @@ router.get("/water-sleep/:date", userAuth, (req, res) => {
  */
 
 router.post("/water/:date", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date } = req.params;
   let { glasses_of_water } = req.body;
   glasses_of_water = typeof glasses_of_water === "undefined" ? 0 : glasses_of_water;
@@ -165,7 +165,7 @@ router.post("/water/:date", userAuth, (req, res) => {
  */
 
 router.post("/sleep/:date", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date } = req.params;
   let { hours_of_sleep } = req.body;
   hours_of_sleep = typeof hours_of_sleep === "undefined" ? 0 : hours_of_sleep;

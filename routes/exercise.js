@@ -185,7 +185,7 @@ router.put("/exercise/:id", userAuth, (req, res) => {
  */
 router.post("/add-exercise", userAuth, (req, res) => {
   const { exerciseId, date } = req.body;
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
 
   const checkExerciseQuery = "SELECT * FROM exercises WHERE id = ?";
   db.execute(checkExerciseQuery, [exerciseId], (err, results) => {
@@ -262,7 +262,7 @@ router.get("/exercise", userAuth, (req, res) => {
  *         description: Database error
  */
 router.get("/user-exercises/:date", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const { date } = req.params;
   const query = `
     SELECT ue.id as userExerciseId, ue.date, e.*

@@ -697,7 +697,7 @@ router.post("/reset-password", async (req, res) => {
 
 // POST /delete-account
 router.post("/delete-account", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const query = "DELETE FROM UserLogins WHERE id = ?";
   db.execute(query, [userId], (err, result) => {
     if (err) {
@@ -730,7 +730,7 @@ router.post("/delete-account", userAuth, (req, res) => {
 
 // POST /deactivate-subscription
 router.post("/deactivate-subscription", userAuth, (req, res) => {
-  const userId = req.userInfo.user.id;
+  const userId = req.userInfo.id;
   const query = "UPDATE UserLogins SET isActive = 0 WHERE id = ?";
   db.execute(query, [userId], (err, result) => {
     if (err) {
@@ -807,7 +807,7 @@ router.get("/version", cors, async (req, res) => {
 router.post("/change-password", userAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    const userId = req.userInfo.user.id;
+    const userId = req.userInfo.id;
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: "Current password and new password are required" });
