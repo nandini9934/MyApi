@@ -32,42 +32,4 @@ router.get("/fooditems", userAuth(), (req, res) => {
   });
 });
 
-/**
- * @swagger
- * /api/fooditems/{mealType}:
- *   get:
- *     summary: Get food items by meal type
- *     tags: [Food Items]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: mealType
- *         required: true
- *         schema:
- *           type: string
- *         description: Meal type to filter food items (e.g., breakfast, lunch)
- *     responses:
- *       200:
- *         description: A list of food items for the specified meal type
- *       500:
- *         description: Database error
- */
-router.get("/fooditems/:mealType", userAuth(), (req, res) => {
-  const { mealType } = req.params;
-  const query = `
-    SELECT *
-    FROM food_items
-    WHERE mealType = ?
-  `;
-  
-  db.execute(query, [mealType], (err, results) => {
-    if (err) {
-      console.error("Error fetching food items:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
-    res.json(results);
-  });
-});
-
 module.exports = router;
