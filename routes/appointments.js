@@ -25,7 +25,7 @@ const router = express.Router();
  *       500:
  *         description: Database error
  */
-router.get("/appointments/user", userAuth, (req, res) => {
+router.get("/appointments/user", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
 
   const query = `
@@ -76,7 +76,7 @@ router.get("/appointments/user", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.get("/appointments/available-slots/:date", userAuth, (req, res) => {
+router.get("/appointments/available-slots/:date", userAuth(), (req, res) => {
   const { date } = req.params;
   const allSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM"];
 
@@ -146,7 +146,7 @@ router.get("/appointments/available-slots/:date", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.post("/appointments", userAuth, (req, res) => {
+router.post("/appointments", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const { date, timeSlot, topic, status } = req.body;
   const expertId = req.body.expertId || null;
@@ -191,7 +191,7 @@ router.post("/appointments", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.put("/appointments/:appointmentId/cancel", userAuth, (req, res) => {
+router.put("/appointments/:appointmentId/cancel", userAuth(), (req, res) => {
   const { appointmentId } = req.params;
   const query = "UPDATE appointments SET status = 'cancelled', updatedAt = ? WHERE id = ?";
   const now = new Date().toISOString().slice(0, 19).replace("T", " ");

@@ -39,7 +39,7 @@ const { userAuth } = require("../middleware/auth");
  *       500:
  *         description: Server or database error
  */
-router.post("/flyer", userAuth, async (req, res) => {
+router.post("/flyer", userAuth(), async (req, res) => {
   try {
     let { name, imageUrl, description, url } = req.body;
 
@@ -77,7 +77,7 @@ router.post("/flyer", userAuth, async (req, res) => {
  *       500:
  *         description: Server or database error
  */
-router.get("/flyer", userAuth, async (req, res) => {
+router.get("/flyer", userAuth(), async (req, res) => {
   const query = "SELECT * FROM flyers";
   db.execute(query, (err, results) => {
     if (err) {

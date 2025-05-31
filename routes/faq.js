@@ -33,7 +33,7 @@ const { userAuth } = require("../middleware/auth");
  *       500:
  *         description: Server or database error
  */
-router.post("/faq", userAuth, (req, res) => {
+router.post("/faq", userAuth(), (req, res) => {
   try {
     let { question, answer } = req.body;
 
@@ -71,7 +71,7 @@ router.post("/faq", userAuth, (req, res) => {
  *       500:
  *         description: Server or database error
  */
-router.get("/faq", userAuth, async (req, res) => {
+router.get("/faq", userAuth(), async (req, res) => {
   const query = "SELECT * FROM faq";
   db.execute(query, (err, results) => {
     if (err) {
@@ -103,7 +103,7 @@ router.get("/faq", userAuth, async (req, res) => {
  *       500:
  *         description: Server or database error
  */
-router.delete('/faq/:id', userAuth, async (req, res) => {
+router.delete('/faq/:id', userAuth(), async (req, res) => {
   const faqId = req.params.id;
 
   const query = "DELETE FROM faq WHERE id = ?";

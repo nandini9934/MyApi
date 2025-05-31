@@ -337,7 +337,7 @@ router.post("/login", cors, async (req, res) => {
  *         description: Database error
  */
 
-router.post("/userdata", userAuth, (req, res) => {
+router.post("/userdata", userAuth(), (req, res) => {
   const userID = req?.userInfo?.user?.id;
 
   const newQuery = "SELECT * FROM UserData WHERE userId = ?";
@@ -696,7 +696,7 @@ router.post("/reset-password", async (req, res) => {
  */
 
 // POST /delete-account
-router.post("/delete-account", userAuth, (req, res) => {
+router.post("/delete-account", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const query = "DELETE FROM UserLogins WHERE id = ?";
   db.execute(query, [userId], (err, result) => {
@@ -729,7 +729,7 @@ router.post("/delete-account", userAuth, (req, res) => {
  */
 
 // POST /deactivate-subscription
-router.post("/deactivate-subscription", userAuth, (req, res) => {
+router.post("/deactivate-subscription", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const query = "UPDATE UserLogins SET isActive = 0 WHERE id = ?";
   db.execute(query, [userId], (err, result) => {
@@ -804,7 +804,7 @@ router.get("/version", cors, async (req, res) => {
  */
 
 // POST /change-password
-router.post("/change-password", userAuth, async (req, res) => {
+router.post("/change-password", userAuth(), async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.userInfo.id;

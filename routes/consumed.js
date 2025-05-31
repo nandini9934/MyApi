@@ -92,7 +92,7 @@ const router = express.Router();
  *       500:
  *         description: Database error
  */
-router.post("/consumed", userAuth, (req, res) => {
+router.post("/consumed", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   let { date, foodId, mealType } = req.query;
 
@@ -247,7 +247,7 @@ router.get("/consumed/:date", userAuth(), (req, res) => {
  *       500:
  *         description: Database error
  */
-router.delete("/consumed", userAuth, (req, res) => {
+router.delete("/consumed", userAuth(), (req, res) => {
   // Existing code unchanged
   const userId = req.userInfo.id;
   const { date, foodId } = req.query;

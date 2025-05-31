@@ -46,7 +46,7 @@ const router = express.Router();
  *         description: Database error
  */
 
-router.get("/water-sleep/:date", userAuth, (req, res) => {
+router.get("/water-sleep/:date", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const { date } = req.params;
   const query = "SELECT glasses_of_water, hours_of_sleep FROM water_sleep WHERE userId = ? AND date = ?";
@@ -103,7 +103,7 @@ router.get("/water-sleep/:date", userAuth, (req, res) => {
  *         description: Database error
  */
 
-router.post("/water/:date", userAuth, (req, res) => {
+router.post("/water/:date", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const { date } = req.params;
   let { glasses_of_water } = req.body;
@@ -164,7 +164,7 @@ router.post("/water/:date", userAuth, (req, res) => {
  *         description: Database error
  */
 
-router.post("/sleep/:date", userAuth, (req, res) => {
+router.post("/sleep/:date", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const { date } = req.params;
   let { hours_of_sleep } = req.body;

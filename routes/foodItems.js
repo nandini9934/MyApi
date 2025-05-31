@@ -17,7 +17,7 @@ const { userAuth } = require("../middleware/auth");
  *       500:
  *         description: Database error
  */
-router.get("/fooditems", userAuth, (req, res) => {
+router.get("/fooditems", userAuth(), (req, res) => {
   const query = `
     SELECT *
     FROM food_items
@@ -53,7 +53,7 @@ router.get("/fooditems", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.get("/fooditems/:mealType", userAuth, (req, res) => {
+router.get("/fooditems/:mealType", userAuth(), (req, res) => {
   const { mealType } = req.params;
   const query = `
     SELECT *

@@ -45,7 +45,7 @@ const { userAuth } = require("../middleware/auth");
  *       500:
  *         description: Database or server error
  */
-router.post("/exercise", userAuth, (req, res) => {
+router.post("/exercise", userAuth(), (req, res) => {
   const { exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage } = req.body;
 
   const query = "INSERT INTO exercises (exerciseName, type, videoLink, muscleType, workoutSteps, exerciseStatus, workoutImage) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -129,7 +129,7 @@ router.post("/exercise", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.put("/exercise/:id", userAuth, (req, res) => {
+router.put("/exercise/:id", userAuth(), (req, res) => {
   const { id } = req.params;
   const { exerciseName, type, videoLink, muscleType, workoutSteps } = req.body;
 
@@ -183,7 +183,7 @@ router.put("/exercise/:id", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.post("/add-exercise", userAuth, (req, res) => {
+router.post("/add-exercise", userAuth(), (req, res) => {
   const { exerciseId, date } = req.body;
   const userId = req.userInfo.id;
 
@@ -227,7 +227,7 @@ router.post("/add-exercise", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.get("/exercise", userAuth, (req, res) => {
+router.get("/exercise", userAuth(), (req, res) => {
   const query = "SELECT * FROM exercises";
   db.execute(query, (err, results) => {
     if (err) {
@@ -261,7 +261,7 @@ router.get("/exercise", userAuth, (req, res) => {
  *       500:
  *         description: Database error
  */
-router.get("/user-exercises/:date", userAuth, (req, res) => {
+router.get("/user-exercises/:date", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
   const { date } = req.params;
   const query = `

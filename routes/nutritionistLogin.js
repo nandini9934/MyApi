@@ -440,7 +440,7 @@ router.put("/nutritionistUpdate", userAuth("nutritionist"), (req, res) => {
  *       500:
  *         description: Server error
  */
-router.delete('/delete-account', userAuth, async (req, res) => {
+router.delete('/delete-account', userAuth(), async (req, res) => {
   const { password } = req.body;
   const nutritionistId = req.user.id;
 
