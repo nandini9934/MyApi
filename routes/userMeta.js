@@ -103,9 +103,9 @@ router.put("/metadata", userAuth(), (req, res) => {
     "bodyfat", "workout", "food", "occupation", "onboarded", "targetWeight"
   ];
 
+  // Format DOB if needed
   if (req.body.dob) {
-    const input = req.body.dob;
-    const parsed = new Date(input);
+    const parsed = new Date(req.body.dob);
     if (!isNaN(parsed)) {
       const yyyy = parsed.getFullYear();
       const mm = String(parsed.getMonth() + 1).padStart(2, '0');
@@ -122,27 +122,31 @@ router.put("/metadata", userAuth(), (req, res) => {
     return res.status(400).json({ error: "No valid fields provided for update" });
   }
 
-  const setClause = fieldsToUpdate.map(field => `${field} = ?`).join(", ");
-  const values = fieldsToUpdate.map(field => req.body[field]);
-  values.push(userID);
+  // Always include the user ID
+  const allFields = ["id", ...fieldsToUpdate];
+  const placeholders = allFields.map(() => "?").join(", ");
+  const insertValues = [userID, ...fieldsToUpdate.map(f => req.body[f])];
 
-  const query = `UPDATE UserData SET ${setClause} WHERE id = ?`;
+  // Build ON DUPLICATE KEY UPDATE clause
+  const updateClause = fieldsToUpdate.map(field => `${field} = VALUES(${field})`).join(", ");
 
-  db.execute(query, values, (err, result) => {
+  const query = `
+    INSERT INTO UserData (${allFields.join(", ")})
+    VALUES (${placeholders})
+    ON DUPLICATE KEY UPDATE ${updateClause}
+  `;
+
+  db.execute(query, insertValues, (err, result) => {
     if (err) {
       console.error("[PUT /metadata] Database error:", err);
       return res.status(500).json({ error: "Database error" });
     }
 
-    if (result.affectedRows === 0) {
-      console.warn(`[PUT /metadata] No user found with ID: ${userID}`);
-      return res.status(404).json({ error: "ID not found" });
-    }
-
-    console.log(`[PUT /metadata] Metadata updated for user ID: ${userID}`);
-    res.json({ message: "User metadata updated successfully" });
+    console.log(`[PUT /metadata] Metadata upserted for user ID: ${userID}`);
+    res.json({ message: "User metadata saved successfully" });
   });
 });
+
 
 /**
  * @swagger
