@@ -241,6 +241,44 @@ router.get("/exercise", userAuth(), (req, res) => {
 
 /**
  * @swagger
+ * /api/exercise/{id}:
+ *   delete:
+ *     summary: Delete an exercise by ID
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exercise ID
+ *     responses:
+ *       200:
+ *         description: Exercise deleted successfully
+ *       404:
+ *         description: Exercise not found
+ *       500:
+ *         description: Database error
+ */
+router.delete("/exercise/:id", userAuth(), (req, res) => {
+  const { id } = req.params;
+  const query = "DELETE FROM exercises WHERE id = ?";
+  db.execute(query, [id], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Exercise not found" });
+    }
+    res.json({ message: "Exercise deleted successfully" });
+  });
+});
+
+/**
+ * @swagger
  * /api/user-exercises/{date}:
  *   get:
  *     summary: Get all exercises assigned to the logged-in user for a specific date
