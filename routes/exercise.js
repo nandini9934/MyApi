@@ -318,4 +318,55 @@ router.get("/user-exercises/:date", userAuth(), (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/user-exercises:
+ *   delete:
+ *     summary: Delete a user's assigned exercise for a specific day
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: exerciseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exercise ID to delete
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date for which to delete the exercise (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: User exercise deleted successfully
+ *       404:
+ *         description: User exercise not found
+ *       500:
+ *         description: Database error
+ */
+router.delete("/user-exercises", userAuth(), (req, res) => {
+  const userId = req.userInfo.id;
+  const { exerciseId, date } = req.query;
+
+  if (!exerciseId || !date) {
+    return res.status(400).json({ error: "exerciseId and date are required" });
+  }
+
+  const query = "DELETE FROM user_exercises WHERE userId = ? AND exerciseId = ? AND date = ?";
+  db.execute(query, [userId, exerciseId, date], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User exercise not found" });
+    }
+    res.json({ message: "User exercise deleted successfully" });
+  });
+});
+
 module.exports = router;
