@@ -13,6 +13,7 @@ const exercise = require("./routes/exercise");
 const userMeta = require("./routes/userMeta");
 const waterSleep = require("./routes/waterSleep");
 const appointments = require("./routes/appointments");
+const bodyMetrics = require("./routes/bodyMetrics");
 
 const nutritionistLogin = require("./routes/nutritionistLogin");
 const nutritionistRoutes = require("./routes/nutritionistRoutes");
@@ -80,6 +81,7 @@ app.use("/api", exercise);
 app.use("/api", userMeta);
 app.use("/api", waterSleep);
 app.use("/api", appointments);
+app.use("/api", bodyMetrics);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -88,7 +90,7 @@ app.use("/api", nutritionistRoutes);
 app.use("/api", foodTemplates);
 
 app.get("/test", (req, res) => {
-  res.send("App restartedss");
+  res.send("App restarted successfully!");
 });
 
 // Start server

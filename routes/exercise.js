@@ -279,7 +279,7 @@ router.delete("/exercise/:id", userAuth(), (req, res) => {
 
 /**
  * @swagger
- * /api/user-exercises/{date}:
+ * /api/ /{date}:
  *   get:
  *     summary: Get all exercises assigned to the logged-in user for a specific date
  *     tags: [Exercise]
