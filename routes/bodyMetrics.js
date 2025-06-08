@@ -60,10 +60,22 @@ const router = express.Router();
 // CREATE (date payload me)
 router.post("/body-metrics", userAuth(), (req, res) => {
   const userId = req.userInfo.id;
-  const { bodyfat, water, muscle, weight, bonemass, date } = req.body;
+  let { bodyfat, water, muscle, weight, bonemass, date } = req.body;
+
   if (!date || bodyfat == null || water == null || muscle == null || weight == null || bonemass == null) {
     return res.status(400).json({ error: "date, bodyfat, water, muscle, weight, bonemass are required" });
   }
+
+  // Normalize date to yyyy-mm-dd string
+  const parsed = new Date(date);
+  if (isNaN(parsed)) {
+    return res.status(400).json({ error: "Invalid date format" });
+  }
+  const yyyy = parsed.getFullYear();
+  const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+  const dd = String(parsed.getDate()).padStart(2, '0');
+  date = `${yyyy}-${mm}-${dd}`;
+
   const query = `
     INSERT INTO body_metrics (userId, bodyfat, water, muscle, weight, bonemass, date)
     VALUES (?, ?, ?, ?, ?, ?, ?)
