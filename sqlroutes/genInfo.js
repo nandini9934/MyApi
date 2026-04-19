@@ -72,14 +72,46 @@ router.post("/dailytrack", cors, auth, (req, res) => {
   });
 });
 
-router.get("/geninfo", async (req, res) => {
-  const query = "SELECT * FROM GenInfo where id = ?";
-  db.execute(query[id], (err, results) => {
+router.get("/dailytrack", cors, auth, (req, res) => {
+  const userID = req?.userInfo?.user?.id;
+  const { date } = req.query;
+  if (!date) {
+    return res.status(400).json({ error: "Missing required query parameter: date" });
+  }
+  const query =
+    "SELECT selectedDate, sleepHours, waterIntake, steps FROM DailyTrack WHERE userId = ? AND selectedDate = ?";
+  db.execute(query, [userID, date], (err, results) => {
     if (err) {
-      console.error("Error fetching flyers:", err);
+      console.error("Error fetching dailytrack:", err);
       return res.status(500).json({ error: "Database error" });
     }
-    res.json(results);
+    if (results.length === 0) {
+      return res.json({
+        selectedDate: date,
+        sleepHours: 0,
+        waterIntake: 0,
+        steps: 0,
+      });
+    }
+    return res.json(results[0]);
+  });
+});
+
+router.get("/geninfo", async (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res.status(400).json({ error: "Missing required query parameter: id" });
+  }
+  const query = "SELECT * FROM GenInfo WHERE id = ?";
+  db.execute(query, [id], (err, results) => {
+    if (err) {
+      console.error("Error fetching geninfo:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    res.json(results[0]);
   });
 });
 
