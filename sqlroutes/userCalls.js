@@ -8,8 +8,7 @@ router.post("/call", auth, (req, res) => {
   try {
     const { scheduled_date, scheduled_time } = req.body;
 
-    // Extract user_id from the token (auth middleware should provide the user info)
-    const user_id = req.user.id; // Assuming the decoded user info is stored in req.user
+    const user_id = req.userInfo.user.id;
 
     // Validate the input
     if (!scheduled_date || !scheduled_time) {
@@ -65,7 +64,7 @@ router.post("/call", auth, (req, res) => {
 // GET: Fetch User's Scheduled Calls
 router.get("/calls", auth, (req, res) => {
   try {
-    const user_id = req.user.id; // Extract user ID from the token (auth middleware)
+    const user_id = req.userInfo.user.id;
 
     // Query to fetch the call schedule data for the authenticated user
     const query = `

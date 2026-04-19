@@ -56,7 +56,7 @@ router.put("/exercise/:id", auth, (req, res) => {
 // Add Exercise to User (Assign an Exercise to a User)
 router.post("/add-exercise",auth, (req, res) => {
   const { exerciseId, date } = req.body;
-  const userId = req.user.id; // Assuming you attach user ID from token
+  const userId = req.userInfo.user.id;
 
   // Check if exercise exists
   const checkExerciseQuery = "SELECT * FROM exercises WHERE id = ?";

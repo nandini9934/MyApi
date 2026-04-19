@@ -8,10 +8,12 @@ const router = express.Router();
 const logger = require("../logger");
 const auth = require("../routes/auth");
 const passport = require('passport');
+const { OAuth2Client } = require('google-auth-library');
 const ggpKey = process.env.GGP_SECRET_KEY;
 //const cid = process.env.CLIENT_ID;
 //const csecret = process.env.CLIENT_SECRET;
 const apiKeyMiddleware = require("../routes/apikeymiddleware");
+const googleOAuthClient = new OAuth2Client();
 
 // Initialize passport
 require('../config/passport');
@@ -29,11 +31,77 @@ router.get('/auth/google/callback',
   (req, res) => {
     // Successful authentication
     const { token, user } = req.user;
-    
+
     // You can customize this response based on your frontend needs
     res.redirect(`${process.env.FRONTEND_URL}/auth-success?token=${token}`);
   }
 );
+
+// Mobile Google OAuth — Flutter sends Google idToken, we verify and return app JWT.
+router.post('/auth/google/mobile', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ error: 'idToken is required' });
+    }
+
+    let payload;
+    try {
+      const ticket = await googleOAuthClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch (err) {
+      console.error('Google idToken verification failed:', err.message);
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const email = payload && payload.email;
+    const name = (payload && (payload.name || payload.given_name)) || 'Google User';
+    if (!email) {
+      return res.status(400).json({ error: 'Google account has no email' });
+    }
+
+    db.execute(
+      'SELECT id, email FROM UserLogins WHERE email = ?',
+      [email],
+      (err, results) => {
+        if (err) {
+          console.error('DB error on google login:', err);
+          return res.status(500).json({ error: 'Database error' });
+        }
+
+        const issueToken = (userId) => {
+          const token = jwt.sign({ user: { id: userId } }, ggpKey, {
+            expiresIn: '10h',
+          });
+          return res.status(200).json({ token });
+        };
+
+        if (results.length > 0) {
+          return issueToken(results[0].id);
+        }
+
+        // New user via Google - create UserLogins row, isActive=1, auth_provider='google'
+        db.execute(
+          "INSERT INTO UserLogins (name, email, isActive, signupdate, auth_provider) VALUES (?, ?, 1, NOW(), 'google')",
+          [name, email],
+          (insertErr, insertResult) => {
+            if (insertErr) {
+              console.error('Error creating google user:', insertErr);
+              return res.status(500).json({ error: 'Database error' });
+            }
+            return issueToken(insertResult.insertId);
+          }
+        );
+      }
+    );
+  } catch (err) {
+    console.error('Server error in google/mobile:', err.message);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
 
 router.post("/signup", async (req, res) => {
   try {
@@ -283,14 +351,14 @@ router.post("/verifyuser", apiKeyMiddleware, (req, res) => {
       if (error) {
         console.error("Database error:", error);
         return res
-          .status(200)
+          .status(500)
           .json({ title: "Sorry", message: "Something Went Wrong" });
       }
 
       if (result.length === 0) {
-        return res.status(200).json({ title: "", message: "User not found" });
+        return res.status(404).json({ title: "", message: "User not found" });
       }
-      const newCon = "temp";
+
       const { auth_token, isActive } = result[0];
 
       if (isActive === 1) {
@@ -301,14 +369,14 @@ router.post("/verifyuser", apiKeyMiddleware, (req, res) => {
       }
 
       if (auth_token !== token) {
-        return res.status(200).json({ title: "", message: "Invalid token" });
+        return res.status(400).json({ title: "", message: "Invalid token" });
       }
 
       const updateQuery = "UPDATE UserLogins SET isActive = 1 WHERE id = ?";
       db.execute(updateQuery, [id], (updateError) => {
         if (updateError) {
           console.error("Update error:", updateError);
-          return res.status(200).json({
+          return res.status(500).json({
             title: "Sorry",
             message: "Failed to activate account. Please try again later.",
           });
@@ -322,7 +390,7 @@ router.post("/verifyuser", apiKeyMiddleware, (req, res) => {
     });
   } catch (error) {
     console.error("Token verification error:", error);
-    res.status(200).json({
+    res.status(401).json({
       title: "Sorry",
       message: "Token expired or invalid. Please regenerate your token.",
     });
